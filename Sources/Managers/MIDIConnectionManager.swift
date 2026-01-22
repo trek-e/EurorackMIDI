@@ -12,8 +12,8 @@ final class MIDIConnectionManager {
 
     private let midiManager: ObservableMIDIManager
 
-    /// Currently selected MIDI output device
-    var selectedDevice: MIDIOutputEndpoint?
+    /// Currently selected MIDI destination device (where we send TO)
+    var selectedDevice: MIDIInputEndpoint?
 
     /// Current MIDI channel (1-16)
     var selectedChannel: MIDIChannel = .default
@@ -24,9 +24,9 @@ final class MIDIConnectionManager {
     /// User-facing connection error message
     var connectionError: String?
 
-    /// Available MIDI output devices
-    var availableOutputs: [MIDIOutputEndpoint] {
-        midiManager.endpoints.outputs
+    /// Available MIDI destination devices (where we can send TO)
+    var availableDestinations: [MIDIInputEndpoint] {
+        midiManager.endpoints.inputs
     }
 
     // MARK: - Initialization
@@ -63,8 +63,8 @@ final class MIDIConnectionManager {
                     // Check if this is our previously selected device
                     if let lastID = self.lastSelectedDeviceID {
                         // Refresh endpoints and check if the added device matches
-                        let outputs = self.midiManager.endpoints.outputs
-                        if let reconnectedDevice = outputs.first(where: { $0.uniqueID == lastID }) {
+                        let destinations = self.midiManager.endpoints.inputs
+                        if let reconnectedDevice = destinations.first(where: { $0.uniqueID == lastID }) {
                             // Auto-reconnect
                             self.selectedDevice = reconnectedDevice
                             self.updateOutputConnection()

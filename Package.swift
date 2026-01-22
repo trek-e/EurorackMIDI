@@ -8,9 +8,9 @@ let package = Package(
         .macOS(.v14)
     ],
     products: [
-        .executable(
-            name: "EurorackMIDI",
-            targets: ["App"]
+        .library(
+            name: "EurorackMIDILib",
+            targets: ["EurorackMIDILib"]
         )
     ],
     dependencies: [
@@ -18,8 +18,8 @@ let package = Package(
         .package(url: "https://github.com/elai950/AlertToast", branch: "master")
     ],
     targets: [
-        .executableTarget(
-            name: "App",
+        .target(
+            name: "EurorackMIDILib",
             dependencies: [
                 .product(name: "MIDIKitIO", package: "MIDIKit"),
                 .product(name: "AlertToast", package: "AlertToast")

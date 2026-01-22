@@ -1,12 +1,12 @@
 import SwiftUI
 import MIDIKitIO
 
-/// Device selection picker for MIDI outputs
+/// Device selection picker for MIDI destinations (where we send TO)
 struct DevicePickerView: View {
     @State private var manager = MIDIConnectionManager.shared
 
     var body: some View {
-        if manager.availableOutputs.isEmpty {
+        if manager.availableDestinations.isEmpty {
             Text("No devices found")
                 .foregroundStyle(.secondary)
         } else {
@@ -14,7 +14,7 @@ struct DevicePickerView: View {
                 get: { manager.selectedDevice?.uniqueID },
                 set: { newID in
                     if let newID = newID {
-                        manager.selectedDevice = manager.availableOutputs.first(where: { $0.uniqueID == newID })
+                        manager.selectedDevice = manager.availableDestinations.first(where: { $0.uniqueID == newID })
                     } else {
                         manager.selectedDevice = nil
                     }
@@ -24,7 +24,7 @@ struct DevicePickerView: View {
                 Text("No Device")
                     .tag(nil as MIDIIdentifier?)
 
-                ForEach(manager.availableOutputs, id: \.uniqueID) { endpoint in
+                ForEach(manager.availableDestinations, id: \.uniqueID) { endpoint in
                     Text(endpoint.displayName)
                         .tag(endpoint.uniqueID as MIDIIdentifier?)
                 }
