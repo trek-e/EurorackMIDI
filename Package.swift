@@ -24,7 +24,7 @@ let package = Package(
                 .product(name: "MIDIKitIO", package: "MIDIKit"),
                 .product(name: "AlertToast", package: "AlertToast")
             ],
-            path: "Sources/App"
+            path: "Sources"
         )
     ]
 )
