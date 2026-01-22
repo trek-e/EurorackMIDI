@@ -67,8 +67,10 @@ final class MIDIConnectionManager {
                         if let reconnectedDevice = outputs.first(where: { $0.uniqueID == lastID }) {
                             // Auto-reconnect
                             self.selectedDevice = reconnectedDevice
+                            self.updateOutputConnection()
                             self.lastSelectedDeviceID = nil
                             self.connectionError = nil
+                            ToastManager.shared.show(message: "Device reconnected", type: .success)
                         }
                     }
 
@@ -79,7 +81,9 @@ final class MIDIConnectionManager {
                         // Store ID for potential reconnect
                         self.lastSelectedDeviceID = selectedID
                         self.selectedDevice = nil
+                        self.updateOutputConnection()
                         self.connectionError = "Device disconnected"
+                        ToastManager.shared.show(message: "Device unplugged", type: .warning)
                     }
 
                 default:
@@ -89,21 +93,79 @@ final class MIDIConnectionManager {
         }
     }
 
-    // MARK: - MIDI Send Methods (stubs for Plan 02)
+    // MARK: - Output Connection Management
+
+    private let outputConnectionTag = "MainOutput"
+
+    /// Update output connection when device changes
+    func updateOutputConnection() {
+        // Remove existing connection if any
+        midiManager.remove(.outputConnection, .withTag(outputConnectionTag))
+
+        // Create new connection if device selected
+        guard let device = selectedDevice else { return }
+
+        do {
+            try midiManager.addOutputConnection(
+                to: .inputs(matching: [.uniqueID(device.uniqueID)]),
+                tag: outputConnectionTag
+            )
+        } catch {
+            connectionError = "Failed to create output connection: \(error.localizedDescription)"
+        }
+    }
+
+    // MARK: - MIDI Send Methods
 
     /// Send MIDI Note On message
     func sendNoteOn(note: UInt7, velocity: UInt7) throws {
-        // Implementation in Plan 02
         guard selectedDevice != nil else {
             throw MIDIConnectionError.noDeviceSelected
+        }
+
+        guard let connection = midiManager.managedOutputConnections[outputConnectionTag] else {
+            throw MIDIConnectionError.deviceUnavailable
+        }
+
+        do {
+            let event = MIDIEvent.noteOn(
+                note,
+                velocity: .midi1(velocity),
+                channel: selectedChannel
+            )
+            try connection.send(event: event)
+        } catch {
+            throw MIDIConnectionError.sendFailed(underlying: error)
         }
     }
 
     /// Send MIDI Note Off message
     func sendNoteOff(note: UInt7) throws {
-        // Implementation in Plan 02
         guard selectedDevice != nil else {
             throw MIDIConnectionError.noDeviceSelected
         }
+
+        guard let connection = midiManager.managedOutputConnections[outputConnectionTag] else {
+            throw MIDIConnectionError.deviceUnavailable
+        }
+
+        do {
+            let event = MIDIEvent.noteOff(
+                note,
+                velocity: .midi1(0),
+                channel: selectedChannel
+            )
+            try connection.send(event: event)
+        } catch {
+            throw MIDIConnectionError.sendFailed(underlying: error)
+        }
+    }
+
+    /// Test connection by sending a note on/off sequence
+    func testConnection() async throws {
+        let testNote: UInt7 = 60 // Middle C
+        try sendNoteOn(note: testNote, velocity: 64)
+        try await Task.sleep(nanoseconds: 200_000_000) // 200ms
+        try sendNoteOff(note: testNote)
     }
 }
