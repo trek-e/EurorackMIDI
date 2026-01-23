@@ -13,6 +13,13 @@ struct PianoRollGridView: View {
     @State private var selectedNoteId: UUID?
     @State private var showNoteEditor: Bool = false
 
+    // Sequencer engine for playhead position
+    @State private var sequencerEngine = SequencerEngine.shared
+    @State private var clockEngine = ClockEngine.shared
+
+    // Environment for color scheme adaptation
+    @Environment(\.colorScheme) private var colorScheme
+
     // Grid configuration
     private let minCellWidth: CGFloat = 40
     private let cellHeight: CGFloat = 24
@@ -80,8 +87,21 @@ struct PianoRollGridView: View {
 
     // MARK: - Grid Canvas
 
+    // Computed properties to track for canvas updates
+    private var isPlaying: Bool {
+        clockEngine.transportState == .playing
+    }
+
+    private var playheadStep: Int {
+        sequencerEngine.currentStep
+    }
+
     private func gridCanvas(size: CGSize) -> some View {
-        Canvas { context, canvasSize in
+        // Capture values for Canvas redraw tracking
+        let currentPlayheadStep = playheadStep
+        let playing = isPlaying
+
+        return Canvas { context, canvasSize in
             let cellWidth = canvasSize.width / CGFloat(stepCount)
 
             // Draw grid lines
@@ -89,7 +109,13 @@ struct PianoRollGridView: View {
 
             // Draw notes
             drawNotes(context: context, size: canvasSize, cellWidth: cellWidth)
+
+            // Draw playhead if playing
+            if playing {
+                drawPlayhead(context: context, size: canvasSize, cellWidth: cellWidth, step: currentPlayheadStep)
+            }
         }
+        .id("grid-\(currentPlayheadStep)-\(playing)")  // Force redraw when playhead moves
         .drawingGroup()  // Metal-backed rendering
         .contentShape(Rectangle())
         .gesture(
@@ -117,6 +143,29 @@ struct PianoRollGridView: View {
     // MARK: - Drawing
 
     private func drawGridLines(context: GraphicsContext, size: CGSize, cellWidth: CGFloat) {
+        // Use adaptive colors based on color scheme
+        let isDark = colorScheme == .dark
+        let bgColor = isDark ? Color(white: 0.12) : Color(white: 0.95)
+        let whiteKeyRowColor = isDark ? Color(white: 0.18) : Color(white: 1.0)
+        let gridLineColor = isDark ? Color(white: 0.35) : Color(white: 0.7)
+        let beatLineColor = isDark ? Color(white: 0.5) : Color(white: 0.5)
+
+        // Fill background
+        let bgRect = CGRect(origin: .zero, size: size)
+        context.fill(Path(bgRect), with: .color(bgColor))
+
+        // Shade white key rows (lighter in both modes)
+        for row in 0..<Int(visibleNoteRange) {
+            let y = CGFloat(row) * cellHeight
+            let noteNumber = lowestNote + UInt8(Int(visibleNoteRange) - 1 - row)
+            let isBlackKey = [1, 3, 6, 8, 10].contains(Int(noteNumber) % 12)
+
+            if !isBlackKey {
+                let rect = CGRect(x: 0, y: y, width: size.width, height: cellHeight)
+                context.fill(Path(rect), with: .color(whiteKeyRowColor))
+            }
+        }
+
         // Vertical lines (step divisions)
         for step in 0...stepCount {
             let x = CGFloat(step) * cellWidth
@@ -128,8 +177,8 @@ struct PianoRollGridView: View {
 
             context.stroke(
                 path,
-                with: .color(isBeatLine ? .gray : .gray.opacity(0.3)),
-                lineWidth: isBeatLine ? 1 : 0.5
+                with: .color(isBeatLine ? beatLineColor : gridLineColor),
+                lineWidth: isBeatLine ? 1.5 : 0.5
             )
         }
 
@@ -145,16 +194,38 @@ struct PianoRollGridView: View {
 
             context.stroke(
                 path,
-                with: .color(isC ? .blue.opacity(0.5) : .gray.opacity(0.2)),
-                lineWidth: isC ? 1 : 0.5
+                with: .color(isC ? .blue.opacity(0.6) : gridLineColor),
+                lineWidth: isC ? 1.5 : 0.5
             )
-
-            // Shade black keys
-            if [1, 3, 6, 8, 10].contains(Int(noteNumber) % 12) {
-                let rect = CGRect(x: 0, y: y, width: size.width, height: cellHeight)
-                context.fill(Path(rect), with: .color(.black.opacity(0.05)))
-            }
         }
+    }
+
+    private func drawPlayhead(context: GraphicsContext, size: CGSize, cellWidth: CGFloat, step: Int) {
+        let x = CGFloat(step) * cellWidth
+
+        // Highlight the current step column
+        let columnRect = CGRect(x: x, y: 0, width: cellWidth, height: size.height)
+        context.fill(Path(columnRect), with: .color(.orange.opacity(0.2)))
+
+        // Draw playhead line at start of step
+        var path = Path()
+        path.move(to: CGPoint(x: x, y: 0))
+        path.addLine(to: CGPoint(x: x, y: size.height))
+
+        // Bright orange playhead for visibility
+        context.stroke(
+            path,
+            with: .color(.orange),
+            lineWidth: 3
+        )
+
+        // Draw small triangle marker at top
+        var triangle = Path()
+        triangle.move(to: CGPoint(x: x, y: 0))
+        triangle.addLine(to: CGPoint(x: x + 8, y: 12))
+        triangle.addLine(to: CGPoint(x: x, y: 12))
+        triangle.closeSubpath()
+        context.fill(triangle, with: .color(.orange))
     }
 
     private func drawNotes(context: GraphicsContext, size: CGSize, cellWidth: CGFloat) {
@@ -170,9 +241,9 @@ struct PianoRollGridView: View {
                 height: cellHeight - 4
             )
 
-            // Note color based on velocity
-            let velocityAlpha = Double(note.velocity) / 127.0
-            let noteColor = Color.green.opacity(0.5 + velocityAlpha * 0.5)
+            // Note color based on velocity - blue to match pad theme
+            let velocityAlpha = 0.6 + (Double(note.velocity) / 127.0) * 0.4
+            let noteColor = Color.blue.opacity(velocityAlpha)
 
             context.fill(
                 Path(roundedRect: rect, cornerRadius: 3),
@@ -182,8 +253,8 @@ struct PianoRollGridView: View {
             // Note border
             context.stroke(
                 Path(roundedRect: rect, cornerRadius: 3),
-                with: .color(.green),
-                lineWidth: 1
+                with: .color(.blue),
+                lineWidth: 1.5
             )
         }
     }
@@ -227,18 +298,18 @@ struct PianoRollGridView: View {
 
 struct PianoKeyLabel: View {
     let note: UInt8
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         ZStack {
             Rectangle()
                 .fill(isBlackKey ? Color.black : Color.white)
-                .border(Color.gray.opacity(0.3), width: 0.5)
+                .border(Color.secondary.opacity(0.3), width: 0.5)
 
-            if note % 12 == 0 {  // C notes
-                Text(noteName)
-                    .font(.caption2)
-                    .foregroundColor(isBlackKey ? .white : .black)
-            }
+            Text(noteName)
+                .font(.caption2)
+                .fontWeight(note % 12 == 0 ? .bold : .regular)
+                .foregroundColor(isBlackKey ? .white : .black)
         }
     }
 
@@ -247,8 +318,10 @@ struct PianoKeyLabel: View {
     }
 
     private var noteName: String {
+        let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
         let octave = Int(note) / 12 - 1
-        return "C\(octave)"
+        let name = noteNames[Int(note) % 12]
+        return "\(name)\(octave)"
     }
 }
 

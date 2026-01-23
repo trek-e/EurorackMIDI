@@ -33,6 +33,20 @@
 		A1000056246813570000001 /* PadMappingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000057246813570000001 /* PadMappingSection.swift */; };
 		A1000058246813570000001 /* PresetListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000059246813570000001 /* PresetListView.swift */; };
 		A100005A246813570000001 /* ProfileDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100005B246813570000001 /* ProfileDocument.swift */; };
+		A1SEQ001246813570000001 /* ClockEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ002246813570000001 /* ClockEngine.swift */; };
+		A1SEQ003246813570000001 /* TapTempo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ004246813570000001 /* TapTempo.swift */; };
+		A1SEQ005246813570000001 /* SequencerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ006246813570000001 /* SequencerEngine.swift */; };
+		A1SEQ007246813570000001 /* PatternManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ008246813570000001 /* PatternManager.swift */; };
+		A1SEQ009246813570000001 /* TransportState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ010246813570000001 /* TransportState.swift */; };
+		A1SEQ011246813570000001 /* Pattern.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ012246813570000001 /* Pattern.swift */; };
+		A1SEQ013246813570000001 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ014246813570000001 /* Track.swift */; };
+		A1SEQ015246813570000001 /* StepNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ016246813570000001 /* StepNote.swift */; };
+		A1SEQ017246813570000001 /* PatternBank.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ018246813570000001 /* PatternBank.swift */; };
+		A1SEQ019246813570000001 /* TransportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ020246813570000001 /* TransportView.swift */; };
+		A1SEQ021246813570000001 /* SequencerTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ022246813570000001 /* SequencerTabView.swift */; };
+		A1SEQ023246813570000001 /* PianoRollGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ024246813570000001 /* PianoRollGridView.swift */; };
+		A1SEQ025246813570000001 /* SequencerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ026246813570000001 /* SequencerView.swift */; };
+		A1SEQ027246813570000001 /* PatternBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1SEQ028246813570000001 /* PatternBrowserView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,6 +74,20 @@
 		A1000057246813570000001 /* PadMappingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PadMappingSection.swift; sourceTree = "<group>"; };
 		A1000059246813570000001 /* PresetListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetListView.swift; sourceTree = "<group>"; };
 		A100005B246813570000001 /* ProfileDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDocument.swift; sourceTree = "<group>"; };
+		A1SEQ002246813570000001 /* ClockEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockEngine.swift; sourceTree = "<group>"; };
+		A1SEQ004246813570000001 /* TapTempo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TapTempo.swift; sourceTree = "<group>"; };
+		A1SEQ006246813570000001 /* SequencerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequencerEngine.swift; sourceTree = "<group>"; };
+		A1SEQ008246813570000001 /* PatternManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternManager.swift; sourceTree = "<group>"; };
+		A1SEQ010246813570000001 /* TransportState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportState.swift; sourceTree = "<group>"; };
+		A1SEQ012246813570000001 /* Pattern.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pattern.swift; sourceTree = "<group>"; };
+		A1SEQ014246813570000001 /* Track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
+		A1SEQ016246813570000001 /* StepNote.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepNote.swift; sourceTree = "<group>"; };
+		A1SEQ018246813570000001 /* PatternBank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternBank.swift; sourceTree = "<group>"; };
+		A1SEQ020246813570000001 /* TransportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransportView.swift; sourceTree = "<group>"; };
+		A1SEQ022246813570000001 /* SequencerTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequencerTabView.swift; sourceTree = "<group>"; };
+		A1SEQ024246813570000001 /* PianoRollGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PianoRollGridView.swift; sourceTree = "<group>"; };
+		A1SEQ026246813570000001 /* SequencerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SequencerView.swift; sourceTree = "<group>"; };
+		A1SEQ028246813570000001 /* PatternBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatternBrowserView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,6 +120,7 @@
 				A1000019246813570000001 /* Managers */,
 				A100001A246813570000001 /* Models */,
 				A100005C246813570000001 /* Utilities */,
+				A1SEQ030246813570000001 /* Sequencer */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -178,6 +207,59 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
+		A1SEQ030246813570000001 /* Sequencer */ = {
+			isa = PBXGroup;
+			children = (
+				A1SEQ031246813570000001 /* Engine */,
+				A1SEQ032246813570000001 /* Managers */,
+				A1SEQ033246813570000001 /* Models */,
+				A1SEQ034246813570000001 /* Views */,
+			);
+			path = Sequencer;
+			sourceTree = "<group>";
+		};
+		A1SEQ031246813570000001 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				A1SEQ002246813570000001 /* ClockEngine.swift */,
+				A1SEQ004246813570000001 /* TapTempo.swift */,
+				A1SEQ006246813570000001 /* SequencerEngine.swift */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		A1SEQ032246813570000001 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				A1SEQ008246813570000001 /* PatternManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		A1SEQ033246813570000001 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A1SEQ010246813570000001 /* TransportState.swift */,
+				A1SEQ012246813570000001 /* Pattern.swift */,
+				A1SEQ014246813570000001 /* Track.swift */,
+				A1SEQ016246813570000001 /* StepNote.swift */,
+				A1SEQ018246813570000001 /* PatternBank.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A1SEQ034246813570000001 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1SEQ020246813570000001 /* TransportView.swift */,
+				A1SEQ022246813570000001 /* SequencerTabView.swift */,
+				A1SEQ024246813570000001 /* PianoRollGridView.swift */,
+				A1SEQ026246813570000001 /* SequencerView.swift */,
+				A1SEQ028246813570000001 /* PatternBrowserView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -210,7 +292,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					A100001B246813570000001 = {
 						CreatedOnToolsVersion = 15.0;
@@ -268,6 +350,20 @@
 				A1000056246813570000001 /* PadMappingSection.swift in Sources */,
 				A1000058246813570000001 /* PresetListView.swift in Sources */,
 				A100005A246813570000001 /* ProfileDocument.swift in Sources */,
+				A1SEQ001246813570000001 /* ClockEngine.swift in Sources */,
+				A1SEQ003246813570000001 /* TapTempo.swift in Sources */,
+				A1SEQ005246813570000001 /* SequencerEngine.swift in Sources */,
+				A1SEQ007246813570000001 /* PatternManager.swift in Sources */,
+				A1SEQ009246813570000001 /* TransportState.swift in Sources */,
+				A1SEQ011246813570000001 /* Pattern.swift in Sources */,
+				A1SEQ013246813570000001 /* Track.swift in Sources */,
+				A1SEQ015246813570000001 /* StepNote.swift in Sources */,
+				A1SEQ017246813570000001 /* PatternBank.swift in Sources */,
+				A1SEQ019246813570000001 /* TransportView.swift in Sources */,
+				A1SEQ021246813570000001 /* SequencerTabView.swift in Sources */,
+				A1SEQ023246813570000001 /* PianoRollGridView.swift in Sources */,
+				A1SEQ025246813570000001 /* SequencerView.swift in Sources */,
+				A1SEQ027246813570000001 /* PatternBrowserView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

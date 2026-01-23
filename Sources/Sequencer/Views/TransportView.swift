@@ -32,7 +32,7 @@ struct TransportView: View {
             }
             .padding()
         }
-        .background(Color(white: 0.1))
+        .background(Color.secondary.opacity(0.1))
         .onAppear {
             bpmText = String(format: "%.1f", clockEngine.bpm)
         }
@@ -109,7 +109,7 @@ struct TransportView: View {
                 .frame(width: 60, height: 60)
                 .background(
                     Circle()
-                        .fill(Color(white: 0.2))
+                        .fill(Color.secondary.opacity(0.2))
                 )
         }
         .buttonStyle(.plain)
@@ -201,7 +201,7 @@ struct TransportView: View {
             .frame(width: 50, height: 50)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(white: 0.2))
+                    .fill(Color.secondary.opacity(0.2))
             )
         }
         .buttonStyle(.plain)
