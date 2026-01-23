@@ -5,6 +5,7 @@ import MIDIKitCore
 /// Pattern: C C# D D# E F F# G G# A A# B C
 struct PianoKeyboardView: View {
     @State private var manager = MIDIConnectionManager.shared
+    @State private var profileManager = ProfileManager.shared
     @State private var octaveOffset: Int = 0
 
     private let baseOctave: Int = 4
@@ -44,6 +45,27 @@ struct PianoKeyboardView: View {
             .padding()
 
             Spacer()
+        }
+        .onAppear {
+            // Load octave offset from profile on appear
+            if let device = manager.selectedDevice {
+                let profile = profileManager.profile(for: device.uniqueID)
+                octaveOffset = profile.keyboardOctaveOffset
+            }
+        }
+        .onChange(of: manager.selectedDevice) { _, newDevice in
+            // Reload octave offset when device changes
+            if let device = newDevice {
+                let profile = profileManager.profile(for: device.uniqueID)
+                octaveOffset = profile.keyboardOctaveOffset
+            }
+        }
+        .onChange(of: octaveOffset) { _, newOffset in
+            // Save octave offset to profile when changed
+            guard let device = manager.selectedDevice else { return }
+            var profile = profileManager.profile(for: device.uniqueID)
+            profile.keyboardOctaveOffset = newOffset
+            profileManager.saveProfile(profile, for: device.uniqueID)
         }
     }
 }
