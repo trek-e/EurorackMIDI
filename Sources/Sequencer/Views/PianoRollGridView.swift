@@ -9,6 +9,10 @@ struct PianoRollGridView: View {
     @State private var lowestNote: UInt8 = 36  // C2
     @State private var visibleNoteRange: UInt8 = 24  // 2 octaves
 
+    // Note editing state
+    @State private var selectedNoteId: UUID?
+    @State private var showNoteEditor: Bool = false
+
     // Grid configuration
     private let minCellWidth: CGFloat = 40
     private let cellHeight: CGFloat = 24
@@ -29,6 +33,26 @@ struct PianoRollGridView: View {
                         )
                 }
             }
+        }
+        .sheet(isPresented: $showNoteEditor) {
+            noteEditorSheet
+        }
+    }
+
+    // MARK: - Note Editor Sheet
+
+    @ViewBuilder
+    private var noteEditorSheet: some View {
+        if let noteId = selectedNoteId,
+           let noteIndex = track.notes.firstIndex(where: { $0.id == noteId }) {
+            NoteEditorView(
+                note: $track.notes[noteIndex],
+                onDelete: {
+                    track.removeNote(id: noteId)
+                    showNoteEditor = false
+                    selectedNoteId = nil
+                }
+            )
         }
     }
 
@@ -72,6 +96,20 @@ struct PianoRollGridView: View {
             DragGesture(minimumDistance: 0)
                 .onEnded { value in
                     handleTap(at: value.location, in: size)
+                }
+        )
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.5)
+                .sequenced(before: DragGesture(minimumDistance: 0))
+                .onEnded { value in
+                    switch value {
+                    case .second(true, let drag):
+                        if let location = drag?.location {
+                            handleLongPress(at: location, in: size)
+                        }
+                    default:
+                        break
+                    }
                 }
         )
     }
@@ -170,6 +208,19 @@ struct PianoRollGridView: View {
             track.addNote(newNote)
         }
     }
+
+    private func handleLongPress(at location: CGPoint, in size: CGSize) {
+        let cellWidth = size.width / CGFloat(stepCount)
+        let step = Int(location.x / cellWidth)
+        let row = Int(location.y / cellHeight)
+        let noteNumber = lowestNote + visibleNoteRange - 1 - UInt8(row)
+
+        // Find note at this position
+        if let note = track.notes.first(where: { $0.step == step && $0.note == noteNumber }) {
+            selectedNoteId = note.id
+            showNoteEditor = true
+        }
+    }
 }
 
 // MARK: - Piano Key Label
@@ -198,6 +249,92 @@ struct PianoKeyLabel: View {
     private var noteName: String {
         let octave = Int(note) / 12 - 1
         return "C\(octave)"
+    }
+}
+
+// MARK: - Note Editor View
+
+/// Sheet view for editing note velocity and duration
+struct NoteEditorView: View {
+    @Binding var note: StepNote
+    let onDelete: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationView {
+            Form {
+                Section("Note") {
+                    HStack {
+                        Text("Pitch")
+                        Spacer()
+                        Text(noteName(for: note.note))
+                            .foregroundColor(.secondary)
+                    }
+
+                    HStack {
+                        Text("Step")
+                        Spacer()
+                        Text("\(note.step + 1)")
+                            .foregroundColor(.secondary)
+                    }
+                }
+
+                Section("Velocity") {
+                    Slider(
+                        value: Binding(
+                            get: { Double(note.velocity) },
+                            set: { note.velocity = UInt8($0) }
+                        ),
+                        in: 1...127,
+                        step: 1
+                    )
+                    Text("\(note.velocity)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Section("Duration") {
+                    Picker("Duration", selection: $note.duration) {
+                        Text("1/4 step").tag(0.25)
+                        Text("1/2 step").tag(0.5)
+                        Text("1 step").tag(1.0)
+                        Text("2 steps").tag(2.0)
+                        Text("4 steps").tag(4.0)
+                    }
+                }
+
+                Section {
+                    Button(role: .destructive) {
+                        onDelete()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("Delete Note")
+                            Spacer()
+                        }
+                    }
+                }
+            }
+            .navigationTitle("Edit Note")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+        #if os(iOS)
+        .presentationDetents([.medium])
+        #endif
+    }
+
+    private func noteName(for midiNote: UInt8) -> String {
+        let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+        let octave = Int(midiNote) / 12 - 1
+        let noteName = noteNames[Int(midiNote) % 12]
+        return "\(noteName)\(octave)"
     }
 }
 
