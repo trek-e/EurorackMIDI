@@ -9,7 +9,7 @@ struct EurorackMIDIApp: App {
                     // Auto-reconnect after short delay to allow MIDI system to initialize
                     Task {
                         try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
-                        await MIDIConnectionManager.shared.attemptAutoReconnect()
+                        MIDIConnectionManager.shared.attemptAutoReconnect()
                     }
                 }
         }
