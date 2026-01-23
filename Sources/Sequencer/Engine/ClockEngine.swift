@@ -37,6 +37,35 @@ final class ClockEngine {
         (60.0 / (bpm * Double(ppqn))) * 1000.0
     }
 
+    // MARK: - Tap Tempo
+
+    /// Tap tempo calculator for live BPM input
+    private let tapTempo = TapTempo()
+
+    /// Process a tap and optionally update BPM
+    /// - Parameter autoApply: If true, automatically applies calculated BPM
+    /// - Returns: Calculated BPM if available (regardless of autoApply)
+    @discardableResult
+    func processTap(autoApply: Bool = true) -> Double? {
+        guard let calculatedBPM = tapTempo.tap() else { return nil }
+
+        if autoApply {
+            bpm = calculatedBPM
+        }
+
+        return calculatedBPM
+    }
+
+    /// Reset tap tempo history
+    func resetTapTempo() {
+        tapTempo.reset()
+    }
+
+    /// Number of recorded taps (for UI feedback)
+    var tapCount: Int {
+        tapTempo.tapCount
+    }
+
     // MARK: - Private Properties
 
     /// Timer for clock generation
