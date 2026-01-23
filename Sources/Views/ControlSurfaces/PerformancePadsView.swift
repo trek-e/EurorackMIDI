@@ -27,6 +27,14 @@ struct PerformancePadsView: View {
         return (0..<padCount).map { UInt7($0) + baseNote }
     }
 
+    private var velocityCurve: VelocityCurve {
+        manager.currentProfile?.velocityCurve ?? .linear
+    }
+
+    private var fixedVelocity: Int? {
+        manager.currentProfile?.fixedVelocity
+    }
+
     // MARK: - Body
 
     var body: some View {
@@ -46,7 +54,9 @@ struct PerformancePadsView: View {
                     PadButtonView(
                         note: note,
                         label: "Pad \(index + 1)",
-                        manager: manager
+                        manager: manager,
+                        velocityCurve: velocityCurve,
+                        fixedVelocity: fixedVelocity
                     )
                     .aspectRatio(1, contentMode: .fit)
                 }
