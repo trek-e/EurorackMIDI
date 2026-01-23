@@ -15,7 +15,7 @@ struct PianoRollGridView: View {
 
     // Sequencer engine for playhead position
     @State private var sequencerEngine = SequencerEngine.shared
-    @State private var clockEngine = ClockEngine.shared
+    @ObservedObject private var clockEngine = ClockEngine.shared
 
     // Environment for color scheme adaptation
     @Environment(\.colorScheme) private var colorScheme

@@ -1,6 +1,6 @@
 import Foundation
+import Combine
 import MIDIKitCore
-import Observation
 
 /// Clock behavior mode for transport/clock relationship
 enum ClockMode: String, CaseIterable {
@@ -36,46 +36,47 @@ enum ClockMode: String, CaseIterable {
 ///
 /// Sends MIDI clock events at configurable BPM and PPQN resolution.
 /// Uses DispatchSourceTimer on a dedicated high-priority queue for precision timing.
-@Observable
-final class ClockEngine: @unchecked Sendable {
+final class ClockEngine: ObservableObject {
     // MARK: - Singleton
 
     /// Shared singleton instance
     static let shared = ClockEngine()
 
-    // MARK: - Lock for thread safety
-
-    private let lock = NSLock()
-
-    // MARK: - Public Properties
+    // MARK: - Published Properties (for UI observation)
 
     /// Tempo in beats per minute (clamped to 20-300)
-    var bpm: Double = 120.0 {
+    @Published var bpm: Double = 120.0 {
         didSet {
-            bpm = max(20.0, min(300.0, bpm))
-            updateTimerInterval()
+            let clampedBpm = max(20.0, min(300.0, bpm))
+            if bpm != clampedBpm {
+                bpm = clampedBpm
+            } else {
+                scheduleTimerUpdate()
+            }
         }
     }
 
-    /// Pulses per quarter note (24, 48, or 96)
-    var ppqn: Int = 24 {
+    /// Pulses per quarter note (4, 24, 48, or 96)
+    @Published var ppqn: Int = 24 {
         didSet {
-            updateTimerInterval()
+            scheduleTimerUpdate()
         }
     }
 
     /// Current transport state
-    private(set) var transportState: TransportState = .stopped
+    @Published private(set) var transportState: TransportState = .stopped
+
+    /// Clock behavior mode
+    @Published var clockMode: ClockMode = .auto
+
+    /// Whether clock is currently sending pulses
+    @Published private(set) var isClockRunning: Bool = false
+
+    // MARK: - Non-published Properties
 
     /// Available PPQN options for UI picker
     /// 4 PPQN for Moog Matriarch and similar synths
     static let ppqnOptions = [4, 24, 48, 96]
-
-    /// Clock behavior mode
-    var clockMode: ClockMode = .auto
-
-    /// Whether clock is currently sending pulses (separate from transport for manual mode)
-    private(set) var isClockRunning: Bool = false
 
     /// Callback invoked on each clock tick (for sequencer synchronization)
     var onTick: (() -> Void)?
@@ -91,14 +92,14 @@ final class ClockEngine: @unchecked Sendable {
     private let tapTempo = TapTempo()
 
     /// Process a tap and optionally update BPM
-    /// - Parameter autoApply: If true, automatically applies calculated BPM
-    /// - Returns: Calculated BPM if available (regardless of autoApply)
     @discardableResult
     func processTap(autoApply: Bool = true) -> Double? {
         guard let calculatedBPM = tapTempo.tap() else { return nil }
 
         if autoApply {
-            bpm = calculatedBPM
+            DispatchQueue.main.async {
+                self.bpm = calculatedBPM
+            }
         }
 
         return calculatedBPM
@@ -125,69 +126,63 @@ final class ClockEngine: @unchecked Sendable {
         qos: .userInteractive
     )
 
-    /// Current tick count since start (accessed from clock queue)
-    private var _tickCount: Int = 0
+    /// Lock for timer state only
+    private let timerLock = NSLock()
 
-    /// Current beat position for song position pointer (accessed from clock queue)
-    private var _currentBeat: Int = 0
+    /// Current tick count since start
+    private var tickCount: Int = 0
 
-    /// Cached PPQN for clock queue access
-    private var _cachedPpqn: Int = 24
+    /// Current beat position for song position pointer
+    private var currentBeat: Int = 0
 
-    /// Cached BPM for clock queue access
-    private var _cachedBpm: Double = 120.0
+    /// Cached values for timer (updated atomically)
+    private var cachedBpm: Double = 120.0
+    private var cachedPpqn: Int = 24
+
+    /// Pending timer update flag
+    private var timerUpdatePending = false
 
     // MARK: - Initialization
 
-    init() {
-        _cachedBpm = bpm
-        _cachedPpqn = ppqn
+    private init() {
+        cachedBpm = bpm
+        cachedPpqn = ppqn
     }
 
     // MARK: - Transport Control
 
     /// Start clock from the beginning
     func start() {
-        // Cache @Observable values before acquiring lock to avoid deadlock
-        let currentBpm = bpm
-        let currentPpqn = ppqn
-        let currentClockMode = clockMode
-
-        lock.lock()
-        defer { lock.unlock() }
-
         guard transportState == .stopped else { return }
 
-        _tickCount = 0
-        _currentBeat = 0
-        _cachedBpm = currentBpm
-        _cachedPpqn = currentPpqn
+        timerLock.lock()
+        tickCount = 0
+        currentBeat = 0
+        cachedBpm = bpm
+        cachedPpqn = ppqn
+        timerLock.unlock()
+
         transportState = .playing
 
-        // Send MIDI Start message (outside lock would be better but keep simple for now)
+        // Send MIDI Start message
         sendStart()
 
         // Start clock based on mode
-        if currentClockMode == .auto {
+        if clockMode == .auto {
             isClockRunning = true
-            startTimerLocked()
+            startTimer()
         }
-        // In manual/always mode, clock is controlled separately
     }
 
     /// Stop clock
     func stop() {
-        lock.lock()
-        defer { lock.unlock() }
-
         guard transportState != .stopped else { return }
 
         // Stop clock based on mode
         if clockMode == .auto {
-            stopTimerLocked()
+            stopTimer()
             isClockRunning = false
         }
-        // In manual/always mode, clock continues running
 
         transportState = .stopped
 
@@ -195,29 +190,24 @@ final class ClockEngine: @unchecked Sendable {
         sendStop()
     }
 
-    /// Continue from current position (named continue_ to avoid Swift keyword)
+    /// Continue from current position
     func continue_() {
-        // Cache @Observable values before acquiring lock
-        let currentBpm = bpm
-        let currentPpqn = ppqn
-        let currentClockMode = clockMode
-
-        lock.lock()
-        defer { lock.unlock() }
-
         guard transportState == .stopped else { return }
 
-        _cachedBpm = currentBpm
-        _cachedPpqn = currentPpqn
+        timerLock.lock()
+        cachedBpm = bpm
+        cachedPpqn = ppqn
+        timerLock.unlock()
+
         transportState = .playing
 
         // Send MIDI Continue message
         sendContinue()
 
         // Resume clock based on mode
-        if currentClockMode == .auto && !isClockRunning {
+        if clockMode == .auto && !isClockRunning {
             isClockRunning = true
-            startTimerLocked()
+            startTimer()
         }
     }
 
@@ -233,32 +223,23 @@ final class ClockEngine: @unchecked Sendable {
     // MARK: - Clock Control (for manual/always modes)
 
     /// Start clock only (without affecting transport state)
-    /// Used in manual or always clock modes
     func startClock() {
-        // Cache @Observable values before acquiring lock
-        let currentBpm = bpm
-        let currentPpqn = ppqn
-
-        lock.lock()
-        defer { lock.unlock() }
-
         guard !isClockRunning else { return }
 
-        _cachedBpm = currentBpm
-        _cachedPpqn = currentPpqn
+        timerLock.lock()
+        cachedBpm = bpm
+        cachedPpqn = ppqn
+        timerLock.unlock()
+
         isClockRunning = true
-        startTimerLocked()
+        startTimer()
     }
 
     /// Stop clock only (without affecting transport state)
-    /// Used in manual clock mode
     func stopClock() {
-        lock.lock()
-        defer { lock.unlock() }
-
         guard isClockRunning else { return }
 
-        stopTimerLocked()
+        stopTimer()
         isClockRunning = false
     }
 
@@ -272,35 +253,32 @@ final class ClockEngine: @unchecked Sendable {
     }
 
     /// Set transport position by MIDI beat number
-    /// - Parameter midiBeat: Position in MIDI beats (1 beat = 6 MIDI clocks)
     func setPosition(midiBeat: Int) {
-        lock.lock()
-        _currentBeat = midiBeat
-        // Calculate tick count from beat position
-        let clocksPerMidiBeat = _cachedPpqn / 4
-        _tickCount = midiBeat * clocksPerMidiBeat
-        lock.unlock()
+        timerLock.lock()
+        currentBeat = midiBeat
+        let clocksPerMidiBeat = cachedPpqn / 4
+        tickCount = midiBeat * clocksPerMidiBeat
+        timerLock.unlock()
 
-        // Send song position pointer to external gear
         sendSongPositionPointer()
     }
 
     /// Reset position to start
     func rewind() {
-        lock.lock()
-        defer { lock.unlock() }
-
-        _tickCount = 0
-        _currentBeat = 0
+        timerLock.lock()
+        tickCount = 0
+        currentBeat = 0
+        timerLock.unlock()
     }
 
-    // MARK: - Private Methods (must be called with lock held)
+    // MARK: - Private Timer Methods
 
-    private func startTimerLocked() {
+    private func startTimer() {
+        timerLock.lock()
+        let intervalSeconds = 60.0 / (cachedBpm * Double(cachedPpqn))
+        timerLock.unlock()
+
         let newTimer = DispatchSource.makeTimerSource(queue: clockQueue)
-
-        // Use cached values to avoid accessing @Observable properties while locked
-        let intervalSeconds = 60.0 / (_cachedBpm * Double(_cachedPpqn))
         newTimer.schedule(
             deadline: .now(),
             repeating: intervalSeconds,
@@ -311,52 +289,55 @@ final class ClockEngine: @unchecked Sendable {
             self?.tick()
         }
 
+        timerLock.lock()
         timer = newTimer
+        timerLock.unlock()
+
         newTimer.resume()
     }
 
-    private func stopTimerLocked() {
-        timer?.cancel()
+    private func stopTimer() {
+        timerLock.lock()
+        let currentTimer = timer
         timer = nil
+        timerLock.unlock()
+
+        currentTimer?.cancel()
     }
 
-    private func updateTimerInterval() {
-        // Cache @Observable values before acquiring lock
-        let currentBpm = bpm
-        let currentPpqn = ppqn
+    /// Schedule a timer update (debounced to avoid rapid restarts)
+    private func scheduleTimerUpdate() {
+        timerLock.lock()
+        cachedBpm = bpm
+        cachedPpqn = ppqn
 
-        lock.lock()
-        _cachedBpm = currentBpm
-        _cachedPpqn = currentPpqn
-
-        // Only update if timer is running
         guard timer != nil else {
-            lock.unlock()
+            timerLock.unlock()
             return
         }
+        timerLock.unlock()
 
-        // Stop and restart timer with new interval
-        stopTimerLocked()
-        startTimerLocked()
-        lock.unlock()
+        // Stop and restart with new interval
+        stopTimer()
+        startTimer()
     }
 
-    /// Called on clockQueue - must be thread-safe
+    /// Called on clockQueue
     private func tick() {
-        // Send timing clock event (thread-safe MIDI send)
+        // Send timing clock event
         sendTimingClock()
 
         // Update internal counters
-        lock.lock()
-        _tickCount += 1
-        let tickCount = _tickCount
-        let clocksPerMidiBeat = _cachedPpqn / 4
-        if tickCount % clocksPerMidiBeat == 0 {
-            _currentBeat += 1
+        timerLock.lock()
+        tickCount += 1
+        let currentTickCount = tickCount
+        let clocksPerMidiBeat = max(1, cachedPpqn / 4)
+        if currentTickCount % clocksPerMidiBeat == 0 {
+            currentBeat += 1
         }
-        lock.unlock()
+        timerLock.unlock()
 
-        // Notify sequencer engine of each tick
+        // Notify sequencer engine
         onTick?()
     }
 
@@ -367,7 +348,6 @@ final class ClockEngine: @unchecked Sendable {
             let event = MIDIEvent.timingClock()
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            // Log error but don't crash - device may have disconnected
             print("ClockEngine: Failed to send timing clock: \(error)")
         }
     }
@@ -399,11 +379,10 @@ final class ClockEngine: @unchecked Sendable {
         }
     }
 
-    /// Send song position pointer for current beat
     func sendSongPositionPointer() {
-        lock.lock()
-        let beat = _currentBeat
-        lock.unlock()
+        timerLock.lock()
+        let beat = currentBeat
+        timerLock.unlock()
 
         do {
             let event = MIDIEvent.songPositionPointer(midiBeat: UInt14(beat))

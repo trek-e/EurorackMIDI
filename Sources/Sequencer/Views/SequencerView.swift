@@ -4,7 +4,7 @@ import SwiftUI
 struct SequencerView: View {
     @ObservedObject private var patternManager = PatternManager.shared
     @State private var sequencerEngine = SequencerEngine.shared
-    @State private var clockEngine = ClockEngine.shared
+    @ObservedObject private var clockEngine = ClockEngine.shared
     @State private var pattern: Pattern = Pattern.newPattern()
     @State private var selectedTrackIndex: Int = 0
     @State private var showPatternBrowser: Bool = false

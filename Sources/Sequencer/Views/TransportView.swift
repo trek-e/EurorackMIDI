@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Transport controls for tempo and playback
 struct TransportView: View {
-    @State private var clockEngine = ClockEngine.shared
+    @ObservedObject private var clockEngine = ClockEngine.shared
     @State private var manager = MIDIConnectionManager.shared
     @State private var bpmText: String = "120.0"
     @State private var isEditingBpm: Bool = false
