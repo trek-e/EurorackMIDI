@@ -27,6 +27,12 @@
 		A1490D03BE20DA43FEBB /* PadMappingMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A14748F0D52D51407887 /* PadMappingMode.swift */; };
 		A1EB761675525D4678BC /* NamedPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0CF0CA153284F9A95 /* NamedPreset.swift */; };
 		A15ED01191EF2A4BFDAB /* DeviceProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F0F00AD6B49A4594A6 /* DeviceProfile.swift */; };
+		A1000050246813570000001 /* DeviceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000051246813570000001 /* DeviceSettingsView.swift */; };
+		A1000052246813570000001 /* MiniKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000053246813570000001 /* MiniKeyboardView.swift */; };
+		A1000054246813570000001 /* VelocityCurveSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000055246813570000001 /* VelocityCurveSection.swift */; };
+		A1000056246813570000001 /* PadMappingSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000057246813570000001 /* PadMappingSection.swift */; };
+		A1000058246813570000001 /* PresetListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000059246813570000001 /* PresetListView.swift */; };
+		A100005A246813570000001 /* ProfileDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100005B246813570000001 /* ProfileDocument.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +50,17 @@
 		A1000045246813570000001 /* PianoKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PianoKeyView.swift; sourceTree = "<group>"; };
 		A1000047246813570000001 /* PianoKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PianoKeyboardView.swift; sourceTree = "<group>"; };
 		A100004A246813570000001 /* OctaveControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OctaveControlsView.swift; sourceTree = "<group>"; };
+		A1FBDAA49A61AE4EB9BB /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
+		A14077B8BD4C8D4B2D8C /* VelocityCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VelocityCurve.swift; sourceTree = "<group>"; };
+		A14748F0D52D51407887 /* PadMappingMode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PadMappingMode.swift; sourceTree = "<group>"; };
+		A1C0CF0CA153284F9A95 /* NamedPreset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NamedPreset.swift; sourceTree = "<group>"; };
+		A1F0F00AD6B49A4594A6 /* DeviceProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceProfile.swift; sourceTree = "<group>"; };
+		A1000051246813570000001 /* DeviceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceSettingsView.swift; sourceTree = "<group>"; };
+		A1000053246813570000001 /* MiniKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MiniKeyboardView.swift; sourceTree = "<group>"; };
+		A1000055246813570000001 /* VelocityCurveSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VelocityCurveSection.swift; sourceTree = "<group>"; };
+		A1000057246813570000001 /* PadMappingSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PadMappingSection.swift; sourceTree = "<group>"; };
+		A1000059246813570000001 /* PresetListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PresetListView.swift; sourceTree = "<group>"; };
+		A100005B246813570000001 /* ProfileDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileDocument.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +92,7 @@
 				A1000018246813570000001 /* Views */,
 				A1000019246813570000001 /* Managers */,
 				A100001A246813570000001 /* Models */,
+				A100005C246813570000001 /* Utilities */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -94,6 +112,7 @@
 				A1000006246813570000001 /* DevicePickerView.swift */,
 				A1000008246813570000001 /* ChannelSelectorView.swift */,
 				A1000048246813570000001 /* ControlSurfaces */,
+				A100004C246813570000001 /* Settings */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -108,6 +127,18 @@
 				A100004A246813570000001 /* OctaveControlsView.swift */,
 			);
 			path = ControlSurfaces;
+			sourceTree = "<group>";
+		};
+		A100004C246813570000001 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				A1000051246813570000001 /* DeviceSettingsView.swift */,
+				A1000053246813570000001 /* MiniKeyboardView.swift */,
+				A1000055246813570000001 /* VelocityCurveSection.swift */,
+				A1000057246813570000001 /* PadMappingSection.swift */,
+				A1000059246813570000001 /* PresetListView.swift */,
+			);
+			path = Settings;
 			sourceTree = "<group>";
 		};
 		A1000019246813570000001 /* Managers */ = {
@@ -139,6 +170,14 @@
 				A1000020246813570000001 /* EurorackMIDI.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A100005C246813570000001 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				A100005B246813570000001 /* ProfileDocument.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -226,6 +265,12 @@
 				A1490D03BE20DA43FEBB /* PadMappingMode.swift in Sources */,
 				A1EB761675525D4678BC /* NamedPreset.swift in Sources */,
 				A15ED01191EF2A4BFDAB /* DeviceProfile.swift in Sources */,
+				A1000050246813570000001 /* DeviceSettingsView.swift in Sources */,
+				A1000052246813570000001 /* MiniKeyboardView.swift in Sources */,
+				A1000054246813570000001 /* VelocityCurveSection.swift in Sources */,
+				A1000056246813570000001 /* PadMappingSection.swift in Sources */,
+				A1000058246813570000001 /* PresetListView.swift in Sources */,
+				A100005A246813570000001 /* ProfileDocument.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,6 +523,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A1000031246813570000001 /* XCRemoteSwiftPackageReference "AlertToast" */;
 			productName = AlertToast;
+		};
+		A1C2008641B1AF474491 /* CloudStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1856DE85F2B5D43008C /* XCRemoteSwiftPackageReference "CloudStorage" */;
+			productName = CloudStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

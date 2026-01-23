@@ -92,7 +92,63 @@ struct DeviceSettingsView: View {
                     midiChannel: profile.midiChannel
                 )
 
-                // Additional sections will be added in Task 2
+                // Pad mapping section
+                PadMappingSection(
+                    mappingMode: Binding(
+                        get: { profile.padMappingMode },
+                        set: { newValue in
+                            profile.padMappingMode = newValue
+                            saveProfile()
+                        }
+                    ),
+                    padBaseNote: Binding(
+                        get: { profile.padBaseNote },
+                        set: { newValue in
+                            profile.padBaseNote = newValue
+                            saveProfile()
+                        }
+                    ),
+                    customPadNotes: Binding(
+                        get: { profile.customPadNotes },
+                        set: { newValue in
+                            profile.customPadNotes = newValue
+                            saveProfile()
+                        }
+                    )
+                )
+
+                // Presets section
+                Section {
+                    NavigationLink {
+                        PresetListView(device: device, isPresented: $isPresented)
+                    } label: {
+                        HStack {
+                            Label("Presets", systemImage: "star.fill")
+                            Spacer()
+                            Text("\(profileManager.namedPresets.count)")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                } header: {
+                    Text("Presets")
+                } footer: {
+                    Text("Save and apply preset configurations across devices.")
+                }
+
+                // Reset section
+                Section {
+                    Button(role: .destructive) {
+                        resetToDefaults()
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("Reset to Defaults")
+                            Spacer()
+                        }
+                    }
+                } footer: {
+                    Text("Restore all settings to factory defaults for this device.")
+                }
             }
             .navigationTitle("Device Settings")
             #if os(iOS)
@@ -110,5 +166,19 @@ struct DeviceSettingsView: View {
 
     private func saveProfile() {
         profileManager.saveProfile(profile, for: device.uniqueID)
+    }
+
+    private func resetToDefaults() {
+        // Create a new default profile for this device
+        let defaultProfile = DeviceProfile(
+            deviceUniqueID: device.uniqueID,
+            deviceDisplayName: device.displayName,
+            userNickname: profile.userNickname // Preserve nickname
+        )
+
+        profile = defaultProfile
+        saveProfile()
+
+        ToastManager.shared.show(message: "Settings reset to defaults", type: .info)
     }
 }

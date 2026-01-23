@@ -5,6 +5,7 @@ import MIDIKitIO
 struct DevicePickerView: View {
     @State private var manager = MIDIConnectionManager.shared
     @State private var profileManager = ProfileManager.shared
+    @State private var showSettings = false
 
     var body: some View {
         if manager.availableDestinations.isEmpty {
@@ -59,6 +60,16 @@ struct DevicePickerView: View {
                 }
             }
             .pickerStyle(.menu)
+            .onLongPressGesture {
+                if manager.selectedDevice != nil {
+                    showSettings = true
+                }
+            }
+            .sheet(isPresented: $showSettings) {
+                if let device = manager.selectedDevice {
+                    DeviceSettingsView(device: device, isPresented: $showSettings)
+                }
+            }
         }
     }
 

@@ -6,6 +6,7 @@ import MIDIKitCore
 struct ContentView: View {
     @State private var manager = MIDIConnectionManager.shared
     @State private var toastManager = ToastManager.shared
+    @State private var profileManager = ProfileManager.shared
     @State private var selectedTab = 0
 
     var body: some View {
@@ -57,6 +58,20 @@ struct ContentView: View {
         } message: {
             if let device = manager.deviceToRemember {
                 Text("Save settings for \(device.displayName) and automatically reconnect in the future?")
+            }
+        }
+        .onAppear {
+            // Load default tab from profile if device is selected
+            if let device = manager.selectedDevice {
+                let profile = profileManager.profile(for: device.uniqueID)
+                selectedTab = profile.defaultTab
+            }
+        }
+        .onChange(of: manager.selectedDevice) { _, newDevice in
+            // Load default tab when device changes
+            if let device = newDevice {
+                let profile = profileManager.profile(for: device.uniqueID)
+                selectedTab = profile.defaultTab
             }
         }
     }
