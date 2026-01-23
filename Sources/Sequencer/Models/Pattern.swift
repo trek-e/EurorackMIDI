@@ -114,6 +114,61 @@ struct Pattern: Codable, Identifiable, Equatable {
     }
 }
 
+// MARK: - Pattern Helper Methods
+
+extension Pattern {
+    /// Check if any track is soloed
+    var anySoloed: Bool {
+        tracks.contains { $0.isSoloed }
+    }
+
+    /// Add a new track
+    mutating func addTrack(channel: UInt8? = nil) {
+        let newChannel = channel ?? UInt8(tracks.count + 1)
+        let track = Track(
+            channel: min(newChannel, 16),
+            name: "Track \(tracks.count + 1)"
+        )
+        tracks.append(track)
+    }
+
+    /// Remove track by ID
+    mutating func removeTrack(id: UUID) {
+        tracks.removeAll { $0.id == id }
+    }
+
+    /// Update modified timestamp
+    mutating func touch() {
+        modifiedAt = Date()
+    }
+
+    /// Get track by index (safe)
+    func track(at index: Int) -> Track? {
+        guard index >= 0 && index < tracks.count else { return nil }
+        return tracks[index]
+    }
+
+    /// Duplicate pattern with new ID
+    func duplicate(newName: String? = nil) -> Pattern {
+        Pattern(
+            id: UUID(),
+            name: newName ?? "\(name) Copy",
+            colorHex: colorHex,
+            stepCount: stepCount,
+            tracks: tracks,
+            swing: swing,
+            triggerMode: triggerMode,
+            launchQuantize: launchQuantize,
+            beatsPerBar: beatsPerBar,
+            createdAt: Date(),
+            modifiedAt: Date()
+        )
+    }
+
+    /// Step count presets
+    static let stepCountPresets = [8, 16, 32, 64]
+}
+
 // MARK: - Color Hex Extension
 
 extension Color {
