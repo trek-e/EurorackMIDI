@@ -160,3 +160,96 @@ class PatternManager: ObservableObject {
         banks.reduce(0) { $0 + $1.patternCount }
     }
 }
+
+// MARK: - Search and Filter
+
+extension PatternManager {
+    /// Find all patterns matching a name (case-insensitive)
+    func searchPatterns(name: String) -> [(bank: Int, slot: Int, pattern: Pattern)] {
+        var results: [(bank: Int, slot: Int, pattern: Pattern)] = []
+
+        for (bankIndex, bank) in banks.enumerated() {
+            for (slot, pattern) in bank.patterns.enumerated() {
+                if let p = pattern,
+                   p.name.localizedCaseInsensitiveContains(name) {
+                    results.append((bankIndex, slot, p))
+                }
+            }
+        }
+
+        return results
+    }
+
+    /// Get all non-empty patterns
+    func allPatterns() -> [(bank: Int, slot: Int, pattern: Pattern)] {
+        var results: [(bank: Int, slot: Int, pattern: Pattern)] = []
+
+        for (bankIndex, bank) in banks.enumerated() {
+            for (slot, pattern) in bank.patterns.enumerated() {
+                if let p = pattern {
+                    results.append((bankIndex, slot, p))
+                }
+            }
+        }
+
+        return results
+    }
+
+    /// Get patterns sorted by modification date (most recent first)
+    func recentPatterns(limit: Int = 10) -> [(bank: Int, slot: Int, pattern: Pattern)] {
+        allPatterns()
+            .sorted { $0.pattern.modifiedAt > $1.pattern.modifiedAt }
+            .prefix(limit)
+            .map { $0 }
+    }
+}
+
+// MARK: - Import/Export Data
+
+extension PatternManager {
+    /// Export single pattern as JSON data
+    func exportPattern(bank bankIndex: Int, slot: Int) -> Data? {
+        guard let pattern = loadPattern(bank: bankIndex, slot: slot) else { return nil }
+        return try? JSONEncoder().encode(pattern)
+    }
+
+    /// Import pattern from JSON data
+    func importPattern(from data: Data) -> Pattern? {
+        try? JSONDecoder().decode(Pattern.self, from: data)
+    }
+
+    /// Export all banks as JSON data (for backup)
+    func exportAllBanks() -> Data? {
+        try? JSONEncoder().encode(banks)
+    }
+
+    /// Import banks from JSON data (replaces all)
+    func importBanks(from data: Data) -> Bool {
+        guard let loadedBanks = try? JSONDecoder().decode([PatternBank].self, from: data) else {
+            return false
+        }
+        banks = loadedBanks
+        persistBanks()
+        return true
+    }
+}
+
+// MARK: - Slot Display Helpers
+
+extension PatternManager {
+    /// Get display name for slot (pattern name or "Empty")
+    func slotDisplayName(bank bankIndex: Int, slot: Int) -> String {
+        loadPattern(bank: bankIndex, slot: slot)?.name ?? "Empty"
+    }
+
+    /// Check if slot is empty
+    func isSlotEmpty(bank bankIndex: Int, slot: Int) -> Bool {
+        loadPattern(bank: bankIndex, slot: slot) == nil
+    }
+
+    /// Get slot identifier string (e.g., "A1", "B16")
+    func slotIdentifier(bank bankIndex: Int, slot: Int) -> String {
+        let bankLetter = String(UnicodeScalar(65 + bankIndex)!)
+        return "\(bankLetter)\(slot + 1)"
+    }
+}
