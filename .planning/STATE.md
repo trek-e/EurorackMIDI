@@ -8,28 +8,28 @@
 ## Current Position
 
 Phase: 3 of 4 (Device Profiles)
-Plan: 05 of 06 in current phase
-Status: In progress - Gap closure
-Last activity: 2026-01-23 — Completed 03-05-PLAN.md (Wire Velocity Curves)
+Plan: 06 of 06 in current phase
+Status: Phase complete
+Last activity: 2026-01-23 — Completed 03-06-PLAN.md (Octave Persistence & Pad Mapping)
 
-Progress: [██████████░░░░░░░░░░] 50% (2 of 4 known plans)
+Progress: [███████████████░░░░░] 75% (3 of 4 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
-- Average duration: 9 min
-- Total execution time: 0.3 hours
+- Total plans completed: 3
+- Average duration: 7 min
+- Total execution time: 0.33 hours
 
 **By Phase:**
 
 | Phase | Plans | Total Time | Avg/Plan |
 |-------|-------|------------|----------|
-| 03    | 2     | 18 min     | 9 min    |
+| 03    | 3     | 20 min     | 7 min    |
 
 **Recent Trend:**
-- Last 2 plans: 15 min (03-04), 3 min (03-05)
-- Trend: Improving (gap closure plan faster than feature plan)
+- Last 3 plans: 15 min (03-04), 3 min (03-05), 2 min (03-06)
+- Trend: Excellent (gap closure plans very efficient)
 
 *Updated: 2026-01-23*
 
@@ -44,6 +44,9 @@ Recent decisions affecting current work:
 - **03-04**: Mini keyboard for velocity testing (immediate feedback)
 - **03-05**: Use 1.0 normalized input for touch screens (no pressure sensitivity)
 - **03-05**: Velocity properties passed through view hierarchy (SwiftUI DI pattern)
+- **03-06**: Octave offset in local @State for UI responsiveness, synced via onChange
+- **03-06**: Custom pad notes ignore octave offset for full user control
+- **03-06**: Profile applied on manual device selection ensures currentProfile always valid
 
 ### Pending Todos
 
@@ -51,10 +54,10 @@ None yet.
 
 ### Blockers/Concerns
 
-None - velocity curve integration complete, ready for plan 03-06.
+None - Phase 03 (Device Profiles) complete. All features wired to UI.
 
 ## Session Continuity
 
-Last session: 2026-01-23 05:21
-Stopped at: Completed 03-05-PLAN.md (Wire Velocity Curves to Control Surfaces)
+Last session: 2026-01-23 05:26
+Stopped at: Completed 03-06-PLAN.md (Octave Persistence & Pad Mapping) - Phase 03 complete
 Resume file: None
