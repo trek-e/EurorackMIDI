@@ -168,6 +168,8 @@ struct DeviceSettingsView: View {
             .navigationTitle("Device Settings")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #else
+            .formStyle(.grouped)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
