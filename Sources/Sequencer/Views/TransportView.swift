@@ -59,12 +59,10 @@ struct TransportView: View {
 
             Spacer()
 
-            // Clock info
-            if clockEngine.transportState == .playing {
-                Text("Clock: \(String(format: "%.2f", clockEngine.clockIntervalMs))ms")
-                    .font(.caption.monospacedDigit())
-                    .foregroundColor(.secondary)
-            }
+            // Clock info - always show so user can verify PPQN changes
+            Text("\(clockEngine.ppqn) PPQN @ \(String(format: "%.1f", clockEngine.clockIntervalMs))ms")
+                .font(.caption.monospacedDigit())
+                .foregroundColor(.secondary)
 
             Spacer()
 
@@ -225,7 +223,7 @@ struct TransportView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .frame(width: 120)
+            .frame(width: 160)
         }
     }
 
