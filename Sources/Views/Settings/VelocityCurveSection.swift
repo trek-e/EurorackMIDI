@@ -28,31 +28,32 @@ struct VelocityCurveSection: View {
                 ), in: 1...127)
             }
 
-            // Visual curve preview
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Curve Preview")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            // Visual curve preview and test keyboard - centered together
+            VStack(alignment: .center, spacing: 12) {
+                // Curve preview
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Curve Preview")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
 
-                CurvePreviewView(curve: velocityCurve)
-                    .frame(height: 80)
-                    .frame(maxWidth: 400)
-                    .padding(.vertical, 4)
+                    CurvePreviewView(curve: velocityCurve)
+                        .frame(width: 240, height: 80)
+                }
+
+                // Test keyboard centered under curve
+                VStack(alignment: .center, spacing: 4) {
+                    Text("Test Keyboard")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    MiniKeyboardView(
+                        velocityCurve: velocityCurve,
+                        fixedVelocity: fixedVelocity,
+                        midiChannel: midiChannel
+                    )
+                }
             }
-
-            // Mini keyboard for live testing
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Test Keyboard")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                MiniKeyboardView(
-                    velocityCurve: velocityCurve,
-                    fixedVelocity: fixedVelocity,
-                    midiChannel: midiChannel
-                )
-                .padding(.vertical, 4)
-            }
+            .frame(maxWidth: .infinity)
         } header: {
             Text("Velocity")
         }
