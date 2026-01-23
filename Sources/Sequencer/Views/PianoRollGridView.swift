@@ -26,24 +26,71 @@ struct PianoRollGridView: View {
     private let pianoKeyWidth: CGFloat = 40
 
     var body: some View {
-        GeometryReader { geometry in
-            HStack(spacing: 0) {
-                // Piano keys column
-                pianoKeysView
+        VStack(spacing: 0) {
+            // Octave controls
+            octaveControls
 
-                // Scrollable grid
-                ScrollView([.horizontal, .vertical], showsIndicators: true) {
-                    gridCanvas(size: gridSize(for: geometry))
-                        .frame(
-                            width: gridSize(for: geometry).width,
-                            height: gridSize(for: geometry).height
-                        )
+            GeometryReader { geometry in
+                HStack(spacing: 0) {
+                    // Piano keys column
+                    pianoKeysView
+
+                    // Scrollable grid
+                    ScrollView([.horizontal, .vertical], showsIndicators: true) {
+                        gridCanvas(size: gridSize(for: geometry))
+                            .frame(
+                                width: gridSize(for: geometry).width,
+                                height: gridSize(for: geometry).height
+                            )
+                    }
                 }
             }
         }
         .sheet(isPresented: $showNoteEditor) {
             noteEditorSheet
         }
+    }
+
+    // MARK: - Octave Controls
+
+    private var octaveControls: some View {
+        HStack {
+            Button {
+                // Move down an octave (lower notes)
+                if lowestNote >= 12 {
+                    lowestNote -= 12
+                }
+            } label: {
+                Label("Octave Down", systemImage: "chevron.down")
+                    .labelStyle(.iconOnly)
+            }
+            .disabled(lowestNote < 12)
+
+            Text("Octave: \(Int(lowestNote) / 12 - 1) - \(Int(lowestNote + visibleNoteRange - 1) / 12 - 1)")
+                .font(.caption.monospacedDigit())
+                .frame(minWidth: 80)
+
+            Button {
+                // Move up an octave (higher notes)
+                if lowestNote + visibleNoteRange <= 115 {  // Keep top note <= 127
+                    lowestNote += 12
+                }
+            } label: {
+                Label("Octave Up", systemImage: "chevron.up")
+                    .labelStyle(.iconOnly)
+            }
+            .disabled(lowestNote + visibleNoteRange > 115)
+
+            Spacer()
+
+            // Show current MIDI note range
+            Text("MIDI: \(lowestNote) - \(lowestNote + visibleNoteRange - 1)")
+                .font(.caption.monospacedDigit())
+                .foregroundColor(.secondary)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 4)
+        .background(Color.secondary.opacity(0.1))
     }
 
     // MARK: - Note Editor Sheet
