@@ -152,6 +152,7 @@ struct TransportView: View {
                     .focused($bpmFieldFocused)
                     .onSubmit {
                         commitBpmEdit()
+                        bpmFieldFocused = false  // Dismiss focus so spacebar works
                     }
                     .onChange(of: bpmFieldFocused) { _, focused in
                         isEditingBpm = focused
