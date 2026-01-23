@@ -189,6 +189,7 @@ final class MIDIConnectionManager {
     // MARK: - Auto-reconnect
 
     /// Attempt to reconnect to last connected device on app launch
+    /// Automatically applies saved profile without prompting
     @MainActor
     func attemptAutoReconnect() {
         // Check if there's a last connected device
@@ -206,9 +207,11 @@ final class MIDIConnectionManager {
         selectedDevice = device
         updateOutputConnection()
 
-        // Store device for pending restore settings prompt
-        pendingReconnectDevice = device
-        showRestoreSettingsPrompt = true
+        // Auto-apply saved profile on launch (no prompt)
+        let profile = ProfileManager.shared.profile(for: device.uniqueID)
+        applyProfile(profile)
+
+        ToastManager.shared.show(message: "Connected to \(device.displayName)", type: .success)
     }
 
     /// Apply a profile to the current connection
