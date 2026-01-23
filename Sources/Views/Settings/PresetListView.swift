@@ -1,5 +1,10 @@
 import SwiftUI
 import MIDIKitIO
+import UniformTypeIdentifiers
+
+#if os(macOS)
+import AppKit
+#endif
 
 /// List of named presets with CRUD and export/import functionality
 struct PresetListView: View {
@@ -114,6 +119,13 @@ struct PresetListView: View {
                 }
             )
         }
+        .fileImporter(
+            isPresented: $showImportPicker,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            importPreset(result: result)
+        }
         .onAppear {
             loadPresets()
         }
@@ -160,18 +172,61 @@ struct PresetListView: View {
             let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
             try data.write(to: tempURL)
 
-            // Share using system share sheet
             #if os(iOS)
+            // Share using system share sheet on iOS
             let activityVC = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
             if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let rootVC = scene.windows.first?.rootViewController {
                 rootVC.present(activityVC, animated: true)
             }
-            #endif
-
             toastManager.show(message: "Preset exported", type: .success)
+            #else
+            // Use NSSavePanel on macOS
+            let savePanel = NSSavePanel()
+            savePanel.allowedContentTypes = [.json]
+            savePanel.nameFieldStringValue = filename
+            savePanel.title = "Export Preset"
+            savePanel.message = "Choose where to save the preset"
+
+            if savePanel.runModal() == .OK, let url = savePanel.url {
+                try data.write(to: url)
+                toastManager.show(message: "Preset exported", type: .success)
+            }
+            #endif
         } catch {
             toastManager.show(message: "Export failed: \(error.localizedDescription)", type: .error)
+        }
+    }
+
+    private func importPreset(result: Result<[URL], Error>) {
+        switch result {
+        case .success(let urls):
+            guard let url = urls.first else { return }
+
+            do {
+                // Start accessing security-scoped resource
+                let accessing = url.startAccessingSecurityScopedResource()
+                defer {
+                    if accessing {
+                        url.stopAccessingSecurityScopedResource()
+                    }
+                }
+
+                let data = try Data(contentsOf: url)
+                let importedProfile = try ProfileDocument.importProfile(from: data)
+
+                // Create a named preset from the imported profile
+                let presetName = url.deletingPathExtension().lastPathComponent
+                    .replacingOccurrences(of: "_", with: " ")
+                profileManager.createPreset(name: presetName, from: importedProfile, tag: .custom)
+                loadPresets()
+                toastManager.show(message: "Preset imported", type: .success)
+            } catch {
+                toastManager.show(message: "Import failed: \(error.localizedDescription)", type: .error)
+            }
+
+        case .failure(let error):
+            toastManager.show(message: "Import failed: \(error.localizedDescription)", type: .error)
         }
     }
 }
@@ -272,6 +327,9 @@ struct CreatePresetSheet: View {
                 }
             }
         }
+        #if os(macOS)
+        .frame(minWidth: 350, idealWidth: 400, minHeight: 200, idealHeight: 250)
+        #endif
     }
 }
 
@@ -313,5 +371,8 @@ struct RenamePresetSheet: View {
                 }
             }
         }
+        #if os(macOS)
+        .frame(minWidth: 300, idealWidth: 350, minHeight: 150, idealHeight: 180)
+        #endif
     }
 }

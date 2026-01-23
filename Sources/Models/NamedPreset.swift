@@ -5,6 +5,7 @@ enum PresetTag: String, Codable, CaseIterable {
     case drums = "Drums"
     case keys = "Keys"
     case performance = "Performance"
+    case custom = "Custom"
 
     var displayName: String {
         rawValue
