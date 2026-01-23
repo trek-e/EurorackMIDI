@@ -36,6 +36,7 @@ struct VelocityCurveSection: View {
 
                 CurvePreviewView(curve: velocityCurve)
                     .frame(height: 80)
+                    .frame(maxWidth: 400)
                     .padding(.vertical, 4)
             }
 

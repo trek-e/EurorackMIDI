@@ -37,6 +37,8 @@ struct DeviceSettingsView: View {
                         Spacer()
                         Text(device.displayName)
                             .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
                     }
 
                     TextField("Nickname", text: Binding(
@@ -179,8 +181,7 @@ struct DeviceSettingsView: View {
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         #else
-        .frame(minWidth: 500, minHeight: 600)
-        .padding(.top, 8)
+        .frame(width: 550, height: 620)
         .sheet(isPresented: $showPresetSheet) {
             PresetSheetView(device: device, isPresented: $showPresetSheet)
         }
