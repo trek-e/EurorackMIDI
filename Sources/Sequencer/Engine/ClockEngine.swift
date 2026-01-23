@@ -68,7 +68,8 @@ final class ClockEngine: @unchecked Sendable {
     private(set) var transportState: TransportState = .stopped
 
     /// Available PPQN options for UI picker
-    static let ppqnOptions = [24, 48, 96]
+    /// 4 PPQN for Moog Matriarch and similar synths
+    static let ppqnOptions = [4, 24, 48, 96]
 
     /// Clock behavior mode
     var clockMode: ClockMode = .auto
