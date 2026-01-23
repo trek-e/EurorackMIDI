@@ -44,7 +44,7 @@ final class SequencerEngine {
     private func setupTickCallback() {
         // ClockEngine will call this on each tick
         clockEngine.onTick = { [weak self] in
-            Task { @MainActor in
+            DispatchQueue.main.async {
                 self?.processTick()
             }
         }

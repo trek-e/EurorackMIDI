@@ -299,21 +299,17 @@ final class ClockEngine: @unchecked Sendable {
     private func updateTimerInterval() {
         lock.lock()
         _cachedPpqn = ppqn
-        guard let currentTimer = timer else {
+
+        // Only update if timer is running
+        guard timer != nil else {
             lock.unlock()
             return
         }
-        let intervalSeconds = 60.0 / (bpm * Double(ppqn))
-        lock.unlock()
 
-        // Schedule on clock queue
-        clockQueue.async {
-            currentTimer.schedule(
-                deadline: .now(),
-                repeating: intervalSeconds,
-                leeway: .nanoseconds(0)
-            )
-        }
+        // Stop and restart timer with new interval
+        stopTimerLocked()
+        startTimerLocked()
+        lock.unlock()
     }
 
     /// Called on clockQueue - must be thread-safe
