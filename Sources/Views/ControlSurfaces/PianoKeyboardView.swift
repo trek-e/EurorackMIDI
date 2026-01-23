@@ -1,59 +1,98 @@
 import SwiftUI
 import MIDIKitCore
 
-/// 2-octave piano keyboard (C3-B4) with velocity-sensitive keys
+/// 2-octave piano keyboard with velocity-sensitive keys and octave controls
 struct PianoKeyboardView: View {
     // MARK: - Properties
 
     @State private var manager = MIDIConnectionManager.shared
+    @State private var octaveOffset: Int = 0
 
     // Layout constants
     private let whiteKeyWidth: CGFloat = 40
     private let whiteKeySpacing: CGFloat = 2
     private let blackKeyWidth: CGFloat = 28
 
-    // White keys: C D E F G A B (repeated for 2 octaves)
-    // MIDI notes for white keys (C3-B4)
-    private let whiteKeyNotes: [UInt7] = [
-        48, 50, 52, 53, 55, 57, 59,  // C3, D3, E3, F3, G3, A3, B3
-        60, 62, 64, 65, 67, 69, 71   // C4, D4, E4, F4, G4, A4, B4
-    ]
+    // Keyboard configuration
+    private let baseOctave: Int = 3  // Base octave C3
+    private let octaveSpan: Int = 2  // 2 octaves (C3-B4 by default)
+    private let whiteKeysPerOctave: Int = 7  // C D E F G A B
 
-    // Black keys with their white key index positions
-    // Each tuple: (MIDI note, white key index it follows)
-    // Pattern per octave: C#(after 0), D#(after 1), F#(after 3), G#(after 4), A#(after 5)
-    private let blackKeyData: [(note: UInt7, afterWhiteIndex: Int)] = [
-        (49, 0), (51, 1), (54, 3), (56, 4), (58, 5),   // Octave 1: C#3, D#3, F#3, G#3, A#3
-        (61, 7), (63, 8), (66, 10), (68, 11), (70, 12) // Octave 2: C#4, D#4, F#4, G#4, A#4
-    ]
+    // MARK: - Computed Properties
+
+    /// White key MIDI notes based on current octave offset
+    private var whiteKeyNotes: [UInt7] {
+        let baseNote = UInt7(12 * (baseOctave + octaveOffset))  // C of the base octave
+        let whiteKeyOffsets: [UInt7] = [0, 2, 4, 5, 7, 9, 11]  // C D E F G A B semitones
+
+        var notes: [UInt7] = []
+        for octave in 0..<octaveSpan {
+            for offset in whiteKeyOffsets {
+                let note = baseNote + UInt7(octave * 12) + offset
+                notes.append(note)
+            }
+        }
+        return notes
+    }
+
+    /// Black key data with MIDI notes and white key positions
+    private var blackKeyData: [(note: UInt7, afterWhiteIndex: Int)] {
+        let baseNote = UInt7(12 * (baseOctave + octaveOffset))  // C of the base octave
+        // Black keys per octave: C#(after C), D#(after D), F#(after F), G#(after G), A#(after A)
+        // Positions within white key array: 0, 1, 3, 4, 5
+        let blackKeyPattern: [(semitoneOffset: UInt7, afterWhiteIndex: Int)] = [
+            (1, 0), (3, 1), (6, 3), (8, 4), (10, 5)  // C#, D#, F#, G#, A#
+        ]
+
+        var keys: [(note: UInt7, afterWhiteIndex: Int)] = []
+        for octave in 0..<octaveSpan {
+            for (semitoneOffset, whiteIndexInOctave) in blackKeyPattern {
+                let note = baseNote + UInt7(octave * 12) + semitoneOffset
+                let whiteIndex = octave * whiteKeysPerOctave + whiteIndexInOctave
+                keys.append((note: note, afterWhiteIndex: whiteIndex))
+            }
+        }
+        return keys
+    }
 
     // MARK: - Body
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            ZStack(alignment: .topLeading) {
-                // White keys layer
-                HStack(spacing: whiteKeySpacing) {
-                    ForEach(whiteKeyNotes, id: \.self) { note in
+        VStack(spacing: 0) {
+            // Octave controls
+            OctaveControlsView(
+                octaveOffset: $octaveOffset,
+                baseOctave: baseOctave,
+                octaveSpan: octaveSpan
+            )
+            .padding(.horizontal)
+
+            // Keyboard
+            ScrollView(.horizontal, showsIndicators: false) {
+                ZStack(alignment: .topLeading) {
+                    // White keys layer
+                    HStack(spacing: whiteKeySpacing) {
+                        ForEach(whiteKeyNotes, id: \.self) { note in
+                            PianoKeyView(
+                                note: note,
+                                isBlackKey: false,
+                                manager: manager
+                            )
+                        }
+                    }
+
+                    // Black keys layer - each positioned absolutely
+                    ForEach(blackKeyData, id: \.note) { data in
                         PianoKeyView(
-                            note: note,
-                            isBlackKey: false,
+                            note: data.note,
+                            isBlackKey: true,
                             manager: manager
                         )
+                        .offset(x: blackKeyXPosition(afterWhiteIndex: data.afterWhiteIndex))
                     }
                 }
-
-                // Black keys layer - each positioned absolutely
-                ForEach(blackKeyData, id: \.note) { data in
-                    PianoKeyView(
-                        note: data.note,
-                        isBlackKey: true,
-                        manager: manager
-                    )
-                    .offset(x: blackKeyXPosition(afterWhiteIndex: data.afterWhiteIndex))
-                }
+                .padding()
             }
-            .padding()
         }
     }
 
