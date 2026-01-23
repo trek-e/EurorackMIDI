@@ -54,6 +54,9 @@ Recent decisions affecting current work:
 - **04-02**: Store color as hex string for Codable compatibility
 - **04-02**: MIDI channel 1-16 (1-indexed for UI consistency)
 - **04-02**: Pattern id as let constant - duplicate creates new ID via init
+- **04-03**: CloudStorage + FileManager dual storage for pattern persistence
+- **04-03**: ObservableObject for CloudStorage compatibility
+- **04-03**: 4 banks x 16 slots (64 patterns total)
 - **04-04**: ClockEngine.shared singleton for view observation
 - **04-04**: Static ppqnOptions for picker data
 - **04-04**: SequencerTabView as container pattern for step sequencer
