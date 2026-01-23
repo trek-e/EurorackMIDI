@@ -59,25 +59,16 @@ final class SequencerEngine {
         // Check for step boundary
         if tickInStep >= ticksPerStep {
             tickInStep = 0
-            advanceStep(pattern: pattern)
-        }
 
-        // Process note-offs
-        processNoteOffs()
-    }
+            // First: process note-offs for the CURRENT step (before advancing)
+            // Notes scheduled to end on this step get turned off
+            processNoteOffs()
 
-    // MARK: - Step Advancement
+            // Second: schedule new notes for the current step
+            scheduleNotesForCurrentStep(pattern: pattern)
 
-    private func advanceStep(pattern: Pattern) {
-        // Schedule notes for current step before advancing
-        scheduleNotesForCurrentStep(pattern: pattern)
-
-        // Move to next step
-        currentStep = (currentStep + 1) % pattern.stepCount
-
-        // If we wrapped to step 0, we completed a cycle
-        if currentStep == 0 {
-            tickInStep = 0
+            // Third: advance to next step
+            currentStep = (currentStep + 1) % pattern.stepCount
         }
     }
 
