@@ -162,6 +162,12 @@ struct DeviceSettingsView: View {
                 }
             }
         }
+        #if os(iOS)
+        .presentationDetents([.large])
+        .presentationDragIndicator(.visible)
+        #else
+        .frame(minWidth: 400, idealWidth: 500, minHeight: 500, idealHeight: 600)
+        #endif
     }
 
     private func saveProfile() {
