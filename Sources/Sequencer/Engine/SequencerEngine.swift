@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import MIDIKitCore
 import Observation
 
@@ -22,11 +23,14 @@ final class SequencerEngine {
     /// Reference to clock engine
     private let clockEngine: ClockEngine
 
+    /// Cancellables for Combine subscriptions
+    private var cancellables = Set<AnyCancellable>()
+
     /// Ticks per step (varies by PPQN and step resolution)
     private var ticksPerStep: Int {
         // Assuming 16th note steps: 1 step = 1 quarter note / 4
         // At 24 PPQN: 24 / 4 = 6 ticks per step
-        clockEngine.ppqn / 4
+        max(1, clockEngine.ppqn / 4)
     }
 
     /// Current tick within step
@@ -37,6 +41,7 @@ final class SequencerEngine {
     private init() {
         clockEngine = ClockEngine.shared
         setupTickCallback()
+        setupTransportObserver()
     }
 
     // MARK: - Tick Callback
@@ -48,6 +53,22 @@ final class SequencerEngine {
                 self?.processTick()
             }
         }
+    }
+
+    // MARK: - Transport Observer
+
+    private func setupTransportObserver() {
+        // Watch for transport state changes to send all notes off when stopped
+        clockEngine.$transportState
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                if state == .stopped {
+                    self?.allNotesOff()
+                    self?.currentStep = 0
+                    self?.tickInStep = 0
+                }
+            }
+            .store(in: &cancellables)
     }
 
     private func processTick() {
