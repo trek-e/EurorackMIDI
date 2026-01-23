@@ -159,7 +159,11 @@ final class ClockEngine {
 
         // Stop clock based on mode
         if clockMode == .auto {
-            timer?.cancel()
+            // Cancel timer on its queue to avoid race conditions
+            let timerToCancel = timer
+            clockQueue.async {
+                timerToCancel?.cancel()
+            }
             timer = nil
             isClockRunning = false
         }
@@ -212,7 +216,11 @@ final class ClockEngine {
     func stopClock() {
         guard isClockRunning else { return }
 
-        timer?.cancel()
+        // Cancel timer on its queue to avoid race conditions
+        let timerToCancel = timer
+        clockQueue.async {
+            timerToCancel?.cancel()
+        }
         timer = nil
         isClockRunning = false
     }
@@ -267,11 +275,14 @@ final class ClockEngine {
         guard timer != nil else { return }
 
         let intervalSeconds = 60.0 / (bpm * Double(ppqn))
-        timer?.schedule(
-            deadline: .now(),
-            repeating: intervalSeconds,
-            leeway: .nanoseconds(0)
-        )
+        // Must dispatch to clockQueue since timer runs there
+        clockQueue.async { [weak self] in
+            self?.timer?.schedule(
+                deadline: .now(),
+                repeating: intervalSeconds,
+                leeway: .nanoseconds(0)
+            )
+        }
     }
 
     private func tick() {
