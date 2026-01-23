@@ -13,6 +13,14 @@ struct PianoKeyboardView: View {
         12 * (baseOctave + octaveOffset)
     }
 
+    private var velocityCurve: VelocityCurve {
+        manager.currentProfile?.velocityCurve ?? .linear
+    }
+
+    private var fixedVelocity: Int? {
+        manager.currentProfile?.fixedVelocity
+    }
+
     var body: some View {
         VStack(spacing: 16) {
             OctaveControlsView(
@@ -25,7 +33,12 @@ struct PianoKeyboardView: View {
             // Piano keyboard
             HStack {
                 Spacer()
-                PianoOctaveView(baseNote: baseNote, manager: manager)
+                PianoOctaveView(
+                    baseNote: baseNote,
+                    manager: manager,
+                    velocityCurve: velocityCurve,
+                    fixedVelocity: fixedVelocity
+                )
                 Spacer()
             }
             .padding()
@@ -39,6 +52,8 @@ struct PianoKeyboardView: View {
 struct PianoOctaveView: View {
     let baseNote: Int
     let manager: MIDIConnectionManager
+    let velocityCurve: VelocityCurve
+    let fixedVelocity: Int?
 
     // Key dimensions
     private let whiteW: CGFloat = 40
@@ -71,7 +86,9 @@ struct PianoOctaveView: View {
                         note: UInt7(baseNote + semitone),
                         manager: manager,
                         width: whiteW,
-                        height: whiteH
+                        height: whiteH,
+                        velocityCurve: velocityCurve,
+                        fixedVelocity: fixedVelocity
                     )
                 }
             }
@@ -82,7 +99,9 @@ struct PianoOctaveView: View {
                     note: UInt7(baseNote + key.semitone),
                     manager: manager,
                     width: blackW,
-                    height: blackH
+                    height: blackH,
+                    velocityCurve: velocityCurve,
+                    fixedVelocity: fixedVelocity
                 )
                 .position(
                     x: CGFloat(key.whiteIndex + 1) * (whiteW + gap) - gap / 2,
@@ -102,6 +121,8 @@ struct WhiteKeyView: View {
     let manager: MIDIConnectionManager
     let width: CGFloat
     let height: CGFloat
+    let velocityCurve: VelocityCurve
+    let fixedVelocity: Int?
 
     @State private var isPressed = false
 
@@ -114,7 +135,7 @@ struct WhiteKeyView: View {
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
                         if !isPressed {
-                            try? manager.sendNoteOn(note: note, velocity: 100)
+                            try? manager.sendNoteOn(note: note, velocity: velocityCurve.toMIDIVelocity(from: 1.0, fixedValue: fixedVelocity))
                             isPressed = true
                         }
                     }
@@ -132,6 +153,8 @@ struct BlackKeyView: View {
     let manager: MIDIConnectionManager
     let width: CGFloat
     let height: CGFloat
+    let velocityCurve: VelocityCurve
+    let fixedVelocity: Int?
 
     @State private var isPressed = false
 
@@ -143,7 +166,7 @@ struct BlackKeyView: View {
                 DragGesture(minimumDistance: 0)
                     .onChanged { _ in
                         if !isPressed {
-                            try? manager.sendNoteOn(note: note, velocity: 100)
+                            try? manager.sendNoteOn(note: note, velocity: velocityCurve.toMIDIVelocity(from: 1.0, fixedValue: fixedVelocity))
                             isPressed = true
                         }
                     }
