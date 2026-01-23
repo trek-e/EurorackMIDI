@@ -66,8 +66,16 @@ struct DeviceSettingsView: View {
                         }
                     }
 
-                    // Default Tab picker - keyboard disabled for now
-                    // Picker("Default Tab", selection: ...) { ... }
+                    Picker("Default Tab", selection: Binding(
+                        get: { profile.defaultTab },
+                        set: { newValue in
+                            profile.defaultTab = newValue
+                            saveProfile()
+                        }
+                    )) {
+                        Text("Pads").tag(0)
+                        Text("Keyboard").tag(1)
+                    }
                 } header: {
                     Text("MIDI")
                 }
