@@ -152,9 +152,17 @@ struct SequencerView: View {
                         onSelect: { selectedTrackIndex = index },
                         onMuteToggle: { pattern.tracks[index].isMuted.toggle() },
                         onSoloToggle: {
-                            // If enabling solo on a muted track, unmute it
-                            if !pattern.tracks[index].isSoloed && pattern.tracks[index].isMuted {
-                                pattern.tracks[index].isMuted = false
+                            let isEnablingSolo = !pattern.tracks[index].isSoloed
+
+                            if isEnablingSolo {
+                                // Unmute this track if muted
+                                if pattern.tracks[index].isMuted {
+                                    pattern.tracks[index].isMuted = false
+                                }
+                                // Turn off solo on all other tracks (exclusive solo)
+                                for i in 0..<pattern.tracks.count where i != index {
+                                    pattern.tracks[i].isSoloed = false
+                                }
                             }
                             pattern.tracks[index].isSoloed.toggle()
                         }
