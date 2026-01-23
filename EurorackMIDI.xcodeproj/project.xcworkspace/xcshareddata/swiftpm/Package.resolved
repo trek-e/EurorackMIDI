@@ -1,5 +1,5 @@
 {
-  "originHash" : "834e12618aa4748fee8aadd869246fa1798a820b3aa3dc3cd88d304d651559be",
+  "originHash" : "bc54e4de3744b20b33c0542d7a851880cfee161bee2a102cd58565dd8405d7dd",
   "pins" : [
     {
       "identity" : "alerttoast",
@@ -8,6 +8,15 @@
       "state" : {
         "branch" : "master",
         "revision" : "76a1c1793cd3443001c20c6033beb84453b25d9f"
+      }
+    },
+    {
+      "identity" : "cloudstorage",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nonstrict-hq/CloudStorage",
+      "state" : {
+        "revision" : "d94cb14e563c1a20edeba8a861395c60c2b9d064",
+        "version" : "0.7.0"
       }
     },
     {
