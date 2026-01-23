@@ -26,10 +26,8 @@ struct SequencerView: View {
 
             Divider()
 
-            // Track tabs
-            if pattern.tracks.count > 1 {
-                trackTabBar
-            }
+            // Track tabs (always show so user can add tracks)
+            trackTabBar
 
             // Piano roll grid
             if selectedTrackIndex < pattern.tracks.count {
