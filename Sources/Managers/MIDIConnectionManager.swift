@@ -186,6 +186,16 @@ final class MIDIConnectionManager {
         try sendNoteOff(note: testNote)
     }
 
+    /// Send MIDI system real-time event (clock, start, stop, continue, song position)
+    /// Used by ClockEngine for MIDI clock generation
+    func sendSystemRealTime(event: MIDIEvent) throws {
+        guard let connection = midiManager.managedOutputConnections[outputConnectionTag] else {
+            throw MIDIConnectionError.deviceUnavailable
+        }
+
+        try connection.send(event: event)
+    }
+
     // MARK: - Auto-reconnect
 
     /// Attempt to reconnect to last connected device on app launch
