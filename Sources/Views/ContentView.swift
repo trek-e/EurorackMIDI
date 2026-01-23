@@ -85,10 +85,11 @@ struct ContentView: View {
             }
         }
         .onChange(of: manager.selectedDevice) { _, newDevice in
-            // Load default tab when device changes
+            // Load default tab and apply profile when device changes
             if let device = newDevice {
                 let profile = profileManager.profile(for: device.uniqueID)
                 selectedTab = profile.defaultTab
+                manager.applyProfile(profile)
             }
         }
     }
