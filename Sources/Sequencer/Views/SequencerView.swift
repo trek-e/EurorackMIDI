@@ -4,6 +4,7 @@ import SwiftUI
 struct SequencerView: View {
     @ObservedObject private var patternManager = PatternManager.shared
     @State private var sequencerEngine = SequencerEngine.shared
+    @State private var clockEngine = ClockEngine.shared
     @State private var pattern: Pattern = Pattern.newPattern()
     @State private var selectedTrackIndex: Int = 0
     @State private var showPatternBrowser: Bool = false
@@ -67,6 +68,24 @@ struct SequencerView: View {
         .onAppear {
             // Set initial pattern for sequencer engine
             sequencerEngine.activePattern = pattern
+        }
+        // Spacebar shortcut for play/stop
+        .background {
+            Button("") {
+                togglePlayback()
+            }
+            .keyboardShortcut(.space, modifiers: [])
+            .hidden()
+        }
+    }
+
+    // MARK: - Playback Control
+
+    private func togglePlayback() {
+        if clockEngine.transportState == .playing {
+            clockEngine.stop()
+        } else {
+            clockEngine.start()
         }
     }
 

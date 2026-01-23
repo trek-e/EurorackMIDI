@@ -134,9 +134,13 @@ final class ClockEngine: @unchecked Sendable {
     /// Cached PPQN for clock queue access
     private var _cachedPpqn: Int = 24
 
+    /// Cached BPM for clock queue access
+    private var _cachedBpm: Double = 120.0
+
     // MARK: - Initialization
 
     init() {
+        _cachedBpm = bpm
         _cachedPpqn = ppqn
     }
 
@@ -144,6 +148,11 @@ final class ClockEngine: @unchecked Sendable {
 
     /// Start clock from the beginning
     func start() {
+        // Cache @Observable values before acquiring lock to avoid deadlock
+        let currentBpm = bpm
+        let currentPpqn = ppqn
+        let currentClockMode = clockMode
+
         lock.lock()
         defer { lock.unlock() }
 
@@ -151,14 +160,15 @@ final class ClockEngine: @unchecked Sendable {
 
         _tickCount = 0
         _currentBeat = 0
-        _cachedPpqn = ppqn
+        _cachedBpm = currentBpm
+        _cachedPpqn = currentPpqn
         transportState = .playing
 
-        // Send MIDI Start message
+        // Send MIDI Start message (outside lock would be better but keep simple for now)
         sendStart()
 
         // Start clock based on mode
-        if clockMode == .auto {
+        if currentClockMode == .auto {
             isClockRunning = true
             startTimerLocked()
         }
@@ -187,18 +197,25 @@ final class ClockEngine: @unchecked Sendable {
 
     /// Continue from current position (named continue_ to avoid Swift keyword)
     func continue_() {
+        // Cache @Observable values before acquiring lock
+        let currentBpm = bpm
+        let currentPpqn = ppqn
+        let currentClockMode = clockMode
+
         lock.lock()
         defer { lock.unlock() }
 
         guard transportState == .stopped else { return }
 
+        _cachedBpm = currentBpm
+        _cachedPpqn = currentPpqn
         transportState = .playing
 
         // Send MIDI Continue message
         sendContinue()
 
         // Resume clock based on mode
-        if clockMode == .auto && !isClockRunning {
+        if currentClockMode == .auto && !isClockRunning {
             isClockRunning = true
             startTimerLocked()
         }
@@ -218,11 +235,17 @@ final class ClockEngine: @unchecked Sendable {
     /// Start clock only (without affecting transport state)
     /// Used in manual or always clock modes
     func startClock() {
+        // Cache @Observable values before acquiring lock
+        let currentBpm = bpm
+        let currentPpqn = ppqn
+
         lock.lock()
         defer { lock.unlock() }
 
         guard !isClockRunning else { return }
 
+        _cachedBpm = currentBpm
+        _cachedPpqn = currentPpqn
         isClockRunning = true
         startTimerLocked()
     }
@@ -276,7 +299,8 @@ final class ClockEngine: @unchecked Sendable {
     private func startTimerLocked() {
         let newTimer = DispatchSource.makeTimerSource(queue: clockQueue)
 
-        let intervalSeconds = 60.0 / (bpm * Double(ppqn))
+        // Use cached values to avoid accessing @Observable properties while locked
+        let intervalSeconds = 60.0 / (_cachedBpm * Double(_cachedPpqn))
         newTimer.schedule(
             deadline: .now(),
             repeating: intervalSeconds,
@@ -297,8 +321,13 @@ final class ClockEngine: @unchecked Sendable {
     }
 
     private func updateTimerInterval() {
+        // Cache @Observable values before acquiring lock
+        let currentBpm = bpm
+        let currentPpqn = ppqn
+
         lock.lock()
-        _cachedPpqn = ppqn
+        _cachedBpm = currentBpm
+        _cachedPpqn = currentPpqn
 
         // Only update if timer is running
         guard timer != nil else {
