@@ -23,6 +23,12 @@ struct ContentView: View {
                         Label("Keyboard", systemImage: "pianokeys")
                     }
                     .tag(1)
+
+                SequencerTabView()
+                    .tabItem {
+                        Label("Sequencer", systemImage: "waveform")
+                    }
+                    .tag(2)
             }
             .navigationTitle("EurorackMIDI")
             #if os(iOS)
