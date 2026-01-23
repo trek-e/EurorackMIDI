@@ -4,45 +4,17 @@ import MIDIKitCore
 /// Single-octave piano keyboard (13 keys: 8 white + 5 black)
 /// Pattern: C C# D D# E F F# G G# A A# B C
 struct PianoKeyboardView: View {
-    // MARK: - Properties
-
     @State private var manager = MIDIConnectionManager.shared
     @State private var octaveOffset: Int = 0
 
-    // Layout constants - realistic piano key proportions
-    private let whiteKeyWidth: CGFloat = 44
-    private let whiteKeyHeight: CGFloat = 160
-    private let whiteKeySpacing: CGFloat = 2
-    private let blackKeyWidth: CGFloat = 26
-    private let blackKeyHeight: CGFloat = 100
+    private let baseOctave: Int = 4
 
-    // Keyboard configuration
-    private let baseOctave: Int = 4  // Base octave C4 (middle C)
-
-    // 8 white keys: C, D, E, F, G, A, B, C (includes octave)
-    private let whiteKeyOffsets: [UInt7] = [0, 2, 4, 5, 7, 9, 11, 12]
-
-    // 5 black keys with their positions (which white key they come after)
-    // C#(after C), D#(after D), F#(after F), G#(after G), A#(after A)
-    private let blackKeyData: [(semitone: UInt7, afterWhiteIndex: Int)] = [
-        (1, 0),   // C# after C (index 0)
-        (3, 1),   // D# after D (index 1)
-        (6, 3),   // F# after F (index 3)
-        (8, 4),   // G# after G (index 4)
-        (10, 5)   // A# after A (index 5)
-    ]
-
-    // MARK: - Computed Properties
-
-    private var baseNote: UInt7 {
-        UInt7(12 * (baseOctave + octaveOffset))
+    private var baseNote: Int {
+        12 * (baseOctave + octaveOffset)
     }
-
-    // MARK: - Body
 
     var body: some View {
         VStack(spacing: 16) {
-            // Octave controls
             OctaveControlsView(
                 octaveOffset: $octaveOffset,
                 baseOctave: baseOctave,
@@ -50,45 +22,10 @@ struct PianoKeyboardView: View {
             )
             .padding(.horizontal)
 
-            // Keyboard container - centered horizontally
+            // Piano keyboard
             HStack {
                 Spacer()
-
-                // Piano keyboard using ZStack for layering
-                ZStack(alignment: .topLeading) {
-                    // White keys layer
-                    HStack(spacing: whiteKeySpacing) {
-                        ForEach(whiteKeyOffsets, id: \.self) { offset in
-                            PianoKeyView(
-                                note: baseNote + offset,
-                                isBlackKey: false,
-                                manager: manager,
-                                whiteKeyWidth: whiteKeyWidth,
-                                whiteKeyHeight: whiteKeyHeight,
-                                blackKeyWidth: blackKeyWidth,
-                                blackKeyHeight: blackKeyHeight
-                            )
-                        }
-                    }
-
-                    // Black keys layer - positioned absolutely
-                    ForEach(blackKeyData, id: \.semitone) { data in
-                        PianoKeyView(
-                            note: baseNote + data.semitone,
-                            isBlackKey: true,
-                            manager: manager,
-                            whiteKeyWidth: whiteKeyWidth,
-                            whiteKeyHeight: whiteKeyHeight,
-                            blackKeyWidth: blackKeyWidth,
-                            blackKeyHeight: blackKeyHeight
-                        )
-                        .offset(x: blackKeyXOffset(afterWhiteIndex: data.afterWhiteIndex))
-                    }
-                }
-                .padding(8)
-                .background(Color(white: 0.2))
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-
+                PianoOctaveView(baseNote: baseNote, manager: manager)
                 Spacer()
             }
             .padding()
@@ -96,13 +33,124 @@ struct PianoKeyboardView: View {
             Spacer()
         }
     }
+}
 
-    // MARK: - Helper Methods
+/// A single octave of piano keys (C to C, 13 keys)
+struct PianoOctaveView: View {
+    let baseNote: Int
+    let manager: MIDIConnectionManager
 
-    /// Calculate X offset for black key positioned after given white key index
-    private func blackKeyXOffset(afterWhiteIndex: Int) -> CGFloat {
-        let whiteKeyUnit = whiteKeyWidth + whiteKeySpacing
-        // Position at the right edge of the white key, centered
-        return whiteKeyUnit * CGFloat(afterWhiteIndex + 1) - (blackKeyWidth / 2) - (whiteKeySpacing / 2)
+    // Key dimensions
+    private let whiteW: CGFloat = 40
+    private let whiteH: CGFloat = 150
+    private let blackW: CGFloat = 24
+    private let blackH: CGFloat = 90
+    private let gap: CGFloat = 2
+
+    // White key semitones: C=0, D=2, E=4, F=5, G=7, A=9, B=11, C=12
+    private let whiteNotes = [0, 2, 4, 5, 7, 9, 11, 12]
+
+    // Black key positions: (semitone, x position as fraction of white key width from left edge)
+    // C#=1 between C-D, D#=3 between D-E, F#=6 between F-G, G#=8 between G-A, A#=10 between A-B
+    private let blackKeys: [(semitone: Int, whiteIndex: Int)] = [
+        (1, 0),   // C# after white key 0 (C)
+        (3, 1),   // D# after white key 1 (D)
+        (6, 3),   // F# after white key 3 (F)
+        (8, 4),   // G# after white key 4 (G)
+        (10, 5)   // A# after white key 5 (A)
+    ]
+
+    var body: some View {
+        let totalWidth = CGFloat(whiteNotes.count) * whiteW + CGFloat(whiteNotes.count - 1) * gap
+
+        ZStack(alignment: .topLeading) {
+            // White keys
+            HStack(spacing: gap) {
+                ForEach(whiteNotes, id: \.self) { semitone in
+                    WhiteKeyView(
+                        note: UInt7(baseNote + semitone),
+                        manager: manager,
+                        width: whiteW,
+                        height: whiteH
+                    )
+                }
+            }
+
+            // Black keys positioned on top
+            ForEach(blackKeys, id: \.semitone) { key in
+                BlackKeyView(
+                    note: UInt7(baseNote + key.semitone),
+                    manager: manager,
+                    width: blackW,
+                    height: blackH
+                )
+                .position(
+                    x: CGFloat(key.whiteIndex + 1) * (whiteW + gap) - gap / 2,
+                    y: blackH / 2
+                )
+            }
+        }
+        .frame(width: totalWidth, height: whiteH)
+        .background(Color(white: 0.15))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+}
+
+/// White piano key
+struct WhiteKeyView: View {
+    let note: UInt7
+    let manager: MIDIConnectionManager
+    let width: CGFloat
+    let height: CGFloat
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Rectangle()
+            .fill(isPressed ? Color.blue.opacity(0.3) : Color.white)
+            .frame(width: width, height: height)
+            .border(Color.gray.opacity(0.3), width: 1)
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed {
+                            try? manager.sendNoteOn(note: note, velocity: 100)
+                            isPressed = true
+                        }
+                    }
+                    .onEnded { _ in
+                        try? manager.sendNoteOff(note: note)
+                        isPressed = false
+                    }
+            )
+    }
+}
+
+/// Black piano key
+struct BlackKeyView: View {
+    let note: UInt7
+    let manager: MIDIConnectionManager
+    let width: CGFloat
+    let height: CGFloat
+
+    @State private var isPressed = false
+
+    var body: some View {
+        Rectangle()
+            .fill(isPressed ? Color.blue : Color.black)
+            .frame(width: width, height: height)
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed {
+                            try? manager.sendNoteOn(note: note, velocity: 100)
+                            isPressed = true
+                        }
+                    }
+                    .onEnded { _ in
+                        try? manager.sendNoteOff(note: note)
+                        isPressed = false
+                    }
+            )
     }
 }
