@@ -276,6 +276,13 @@ struct PresetSheetView: View {
                             .foregroundStyle(.secondary)
                         }
                         Spacer()
+                        Button {
+                            exportPreset(preset)
+                        } label: {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                        .buttonStyle(.borderless)
+
                         Button("Apply") {
                             profileManager.applyPreset(preset, to: device.uniqueID)
                             toastManager.show(message: "Preset applied", type: .success)
