@@ -27,6 +27,7 @@
 		A1490D03BE20DA43FEBB /* PadMappingMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A14748F0D52D51407887 /* PadMappingMode.swift */; };
 		A1EB761675525D4678BC /* NamedPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0CF0CA153284F9A95 /* NamedPreset.swift */; };
 		A15ED01191EF2A4BFDAB /* DeviceProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1F0F00AD6B49A4594A6 /* DeviceProfile.swift */; };
+		A1C2008641B1AF474492 /* CloudStorage in Frameworks */ = {isa = PBXBuildFile; productRef = A1C2008641B1AF474491 /* CloudStorage */; };
 		A1000050246813570000001 /* DeviceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000051246813570000001 /* DeviceSettingsView.swift */; };
 		A1000052246813570000001 /* MiniKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000053246813570000001 /* MiniKeyboardView.swift */; };
 		A1000054246813570000001 /* VelocityCurveSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000055246813570000001 /* VelocityCurveSection.swift */; };
@@ -70,7 +71,7 @@
 			files = (
 				A1000011246813570000001 /* MIDIKitIO in Frameworks */,
 				A1000013246813570000001 /* AlertToast in Frameworks */,
-				A1C2008641B1AF474491 /* CloudStorage in Frameworks */,
+				A1C2008641B1AF474492 /* CloudStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
