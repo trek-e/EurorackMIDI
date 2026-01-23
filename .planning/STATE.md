@@ -8,29 +8,29 @@
 ## Current Position
 
 Phase: 4 of 4 (Sequencing)
-Plan: 02 of 06 in current phase
-Status: In progress
-Last activity: 2026-01-23 - Completed 04-02-PLAN.md (Pattern Models)
+Plan: 01 of 06 in current phase
+Status: Plan 01 complete
+Last activity: 2026-01-23 - Completed 04-01-PLAN.md (Clock Engine)
 
 Progress: [███████████████░░░░░] 78% (Phase 4 wave 1 in progress)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: 5.5 min
-- Total execution time: 0.37 hours
+- Total plans completed: 5
+- Average duration: 5 min
+- Total execution time: 0.42 hours
 
 **By Phase:**
 
 | Phase | Plans | Total Time | Avg/Plan |
 |-------|-------|------------|----------|
 | 03    | 3     | 20 min     | 7 min    |
-| 04    | 1     | 2.5 min    | 2.5 min  |
+| 04    | 2     | 5.5 min    | 2.75 min |
 
 **Recent Trend:**
-- Last 3 plans: 3 min (03-05), 2 min (03-06), 2.5 min (04-02)
-- Trend: Excellent (model-only plans very efficient)
+- Last 3 plans: 2 min (03-06), 2.5 min (04-02), 3 min (04-01)
+- Trend: Excellent
 
 *Updated: 2026-01-23*
 
@@ -48,6 +48,9 @@ Recent decisions affecting current work:
 - **03-06**: Octave offset in local @State for UI responsiveness, synced via onChange
 - **03-06**: Custom pad notes ignore octave offset for full user control
 - **03-06**: Profile applied on manual device selection ensures currentProfile always valid
+- **04-01**: DispatchSourceTimer with zero leeway for MIDI clock precision
+- **04-01**: Three clock modes (auto/manual/always) per user requirements
+- **04-01**: @MainActor ClockEngine with background timer queue
 - **04-02**: Store color as hex string for Codable compatibility
 - **04-02**: MIDI channel 1-16 (1-indexed for UI consistency)
 - **04-02**: Pattern id as let constant - duplicate creates new ID via init
@@ -58,12 +61,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- MIDI clock timing requires sample-accurate timestamps and audio thread integration
 - iOS SysEx implementation broken since iOS 16 - use MIDI 2.0 API exclusively
 
 ## Session Continuity
 
 Last session: 2026-01-23
-Stopped at: Completed 04-02-PLAN.md (Pattern Models)
+Stopped at: Completed 04-01-PLAN.md (Clock Engine)
 Resume file: None
-Next step: Continue with 04-03 (Pattern Manager) or other wave 1 plans
+Next step: Continue with remaining wave 1 plans
