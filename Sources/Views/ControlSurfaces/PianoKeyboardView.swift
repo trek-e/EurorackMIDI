@@ -37,26 +37,6 @@ struct PianoKeyboardView: View {
         return notes
     }
 
-    /// Black key data with MIDI notes and white key positions
-    private var blackKeyData: [(note: UInt7, afterWhiteIndex: Int)] {
-        let baseNote = UInt7(12 * (baseOctave + octaveOffset))  // C of the base octave
-        // Black keys per octave: C#(after C), D#(after D), F#(after F), G#(after G), A#(after A)
-        // Positions within white key array: 0, 1, 3, 4, 5
-        let blackKeyPattern: [(semitoneOffset: UInt7, afterWhiteIndex: Int)] = [
-            (1, 0), (3, 1), (6, 3), (8, 4), (10, 5)  // C#, D#, F#, G#, A#
-        ]
-
-        var keys: [(note: UInt7, afterWhiteIndex: Int)] = []
-        for octave in 0..<octaveSpan {
-            for (semitoneOffset, whiteIndexInOctave) in blackKeyPattern {
-                let note = baseNote + UInt7(octave * 12) + semitoneOffset
-                let whiteIndex = octave * whiteKeysPerOctave + whiteIndexInOctave
-                keys.append((note: note, afterWhiteIndex: whiteIndex))
-            }
-        }
-        return keys
-    }
-
     // MARK: - Body
 
     var body: some View {
@@ -69,39 +49,58 @@ struct PianoKeyboardView: View {
             )
             .padding(.horizontal)
 
-            // Keyboard - centered
-            ZStack(alignment: .topLeading) {
-                // White keys layer
-                HStack(spacing: whiteKeySpacing) {
-                    ForEach(whiteKeyNotes, id: \.self) { note in
-                        PianoKeyView(
-                            note: note,
-                            isBlackKey: false,
-                            manager: manager,
-                            whiteKeyWidth: whiteKeyWidth,
-                            whiteKeyHeight: whiteKeyHeight,
-                            blackKeyWidth: blackKeyWidth,
-                            blackKeyHeight: blackKeyHeight
-                        )
+            // Keyboard container - centered horizontally
+            HStack {
+                Spacer()
+
+                // Piano keyboard
+                ZStack(alignment: .top) {
+                    // White keys layer
+                    HStack(spacing: whiteKeySpacing) {
+                        ForEach(whiteKeyNotes, id: \.self) { note in
+                            PianoKeyView(
+                                note: note,
+                                isBlackKey: false,
+                                manager: manager,
+                                whiteKeyWidth: whiteKeyWidth,
+                                whiteKeyHeight: whiteKeyHeight,
+                                blackKeyWidth: blackKeyWidth,
+                                blackKeyHeight: blackKeyHeight
+                            )
+                        }
+                    }
+
+                    // Black keys layer - positioned over white keys
+                    HStack(spacing: 0) {
+                        ForEach(0..<whiteKeysPerOctave, id: \.self) { whiteIndex in
+                            // Space for each white key position
+                            ZStack(alignment: .trailing) {
+                                Color.clear
+                                    .frame(width: whiteKeyWidth + whiteKeySpacing)
+
+                                // Add black key if this position has one
+                                if hasBlackKey(afterWhiteIndex: whiteIndex) {
+                                    PianoKeyView(
+                                        note: blackKeyNote(afterWhiteIndex: whiteIndex),
+                                        isBlackKey: true,
+                                        manager: manager,
+                                        whiteKeyWidth: whiteKeyWidth,
+                                        whiteKeyHeight: whiteKeyHeight,
+                                        blackKeyWidth: blackKeyWidth,
+                                        blackKeyHeight: blackKeyHeight
+                                    )
+                                    .offset(x: blackKeyWidth / 2)
+                                }
+                            }
+                        }
                     }
                 }
+                .background(Color.gray.opacity(0.3))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                // Black keys layer - each positioned absolutely
-                ForEach(blackKeyData, id: \.note) { data in
-                    PianoKeyView(
-                        note: data.note,
-                        isBlackKey: true,
-                        manager: manager,
-                        whiteKeyWidth: whiteKeyWidth,
-                        whiteKeyHeight: whiteKeyHeight,
-                        blackKeyWidth: blackKeyWidth,
-                        blackKeyHeight: blackKeyHeight
-                    )
-                    .offset(x: blackKeyXPosition(afterWhiteIndex: data.afterWhiteIndex))
-                }
+                Spacer()
             }
             .padding()
-            .frame(maxWidth: .infinity)
 
             Spacer()
         }
@@ -109,14 +108,17 @@ struct PianoKeyboardView: View {
 
     // MARK: - Helper Methods
 
-    /// Calculate absolute X position for a black key
-    /// Black key sits centered on the edge between white key at index and the next one
-    private func blackKeyXPosition(afterWhiteIndex: Int) -> CGFloat {
-        // Position of the right edge of the white key at this index
-        let whiteKeyUnit = whiteKeyWidth + whiteKeySpacing
-        let rightEdge = whiteKeyUnit * CGFloat(afterWhiteIndex + 1)
+    /// Check if there's a black key after this white key index
+    private func hasBlackKey(afterWhiteIndex: Int) -> Bool {
+        // Black keys after: C(0), D(1), F(3), G(4), A(5)
+        // No black keys after: E(2), B(6)
+        return [0, 1, 3, 4, 5].contains(afterWhiteIndex)
+    }
 
-        // Center the black key on this edge
-        return rightEdge - (blackKeyWidth / 2) - (whiteKeySpacing / 2)
+    /// Get the MIDI note for the black key after given white key index
+    private func blackKeyNote(afterWhiteIndex: Int) -> UInt7 {
+        let baseNote = UInt7(12 * (baseOctave + octaveOffset))
+        let blackKeySemitones: [Int: UInt7] = [0: 1, 1: 3, 3: 6, 4: 8, 5: 10]
+        return baseNote + (blackKeySemitones[afterWhiteIndex] ?? 0)
     }
 }
