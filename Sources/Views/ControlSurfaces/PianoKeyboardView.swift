@@ -7,18 +7,24 @@ struct PianoKeyboardView: View {
 
     @State private var manager = MIDIConnectionManager.shared
 
+    // Layout constants
+    private let whiteKeyWidth: CGFloat = 40
+    private let whiteKeySpacing: CGFloat = 2
+    private let blackKeyWidth: CGFloat = 28
+
     // White keys: C D E F G A B (repeated for 2 octaves)
-    // MIDI notes 48-71 (C3-B4)
+    // MIDI notes for white keys (C3-B4)
     private let whiteKeyNotes: [UInt7] = [
-        48, 50, 52, 53, 55, 57, 59,  // C3-B3
-        60, 62, 64, 65, 67, 69, 71   // C4-B4
+        48, 50, 52, 53, 55, 57, 59,  // C3, D3, E3, F3, G3, A3, B3
+        60, 62, 64, 65, 67, 69, 71   // C4, D4, E4, F4, G4, A4, B4
     ]
 
-    // Black keys with their positions
-    // Pattern: C# D# _ F# G# A# _ (repeated)
-    private let blackKeyNotes: [UInt7] = [
-        49, 51, 54, 56, 58,          // C#3-A#3
-        61, 63, 66, 68, 70           // C#4-A#4
+    // Black keys with their white key index positions
+    // Each tuple: (MIDI note, white key index it follows)
+    // Pattern per octave: C#(after 0), D#(after 1), F#(after 3), G#(after 4), A#(after 5)
+    private let blackKeyData: [(note: UInt7, afterWhiteIndex: Int)] = [
+        (49, 0), (51, 1), (54, 3), (56, 4), (58, 5),   // Octave 1: C#3, D#3, F#3, G#3, A#3
+        (61, 7), (63, 8), (66, 10), (68, 11), (70, 12) // Octave 2: C#4, D#4, F#4, G#4, A#4
     ]
 
     // MARK: - Body
@@ -27,7 +33,7 @@ struct PianoKeyboardView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             ZStack(alignment: .topLeading) {
                 // White keys layer
-                HStack(spacing: 2) {
+                HStack(spacing: whiteKeySpacing) {
                     ForEach(whiteKeyNotes, id: \.self) { note in
                         PianoKeyView(
                             note: note,
@@ -37,18 +43,15 @@ struct PianoKeyboardView: View {
                     }
                 }
 
-                // Black keys layer (positioned on top)
-                HStack(spacing: 0) {
-                    ForEach(Array(blackKeyNotes.enumerated()), id: \.offset) { index, note in
-                        PianoKeyView(
-                            note: note,
-                            isBlackKey: true,
-                            manager: manager
-                        )
-                        .offset(x: blackKeyOffset(for: index))
-                    }
+                // Black keys layer - each positioned absolutely
+                ForEach(blackKeyData, id: \.note) { data in
+                    PianoKeyView(
+                        note: data.note,
+                        isBlackKey: true,
+                        manager: manager
+                    )
+                    .offset(x: blackKeyXPosition(afterWhiteIndex: data.afterWhiteIndex))
                 }
-                .padding(.leading, blackKeyInitialOffset())
             }
             .padding()
         }
@@ -56,44 +59,14 @@ struct PianoKeyboardView: View {
 
     // MARK: - Helper Methods
 
-    /// Calculate the offset for each black key based on its position
-    private func blackKeyOffset(for index: Int) -> CGFloat {
-        // Pattern within octave: C# D# _ F# G# A# _
-        // Positions: 0, 1, skip, 2, 3, 4, skip
-        let patternInOctave = index % 5
-        let octaveNumber = index / 5
+    /// Calculate absolute X position for a black key
+    /// Black key sits centered on the edge between white key at index and the next one
+    private func blackKeyXPosition(afterWhiteIndex: Int) -> CGFloat {
+        // Position of the right edge of the white key at this index
+        let whiteKeyUnit = whiteKeyWidth + whiteKeySpacing
+        let rightEdge = whiteKeyUnit * CGFloat(afterWhiteIndex + 1)
 
-        // Base spacing between keys
-        let whiteKeyWidth: CGFloat = 40
-        let whiteKeySpacing: CGFloat = 2
-        let blackKeyWidth: CGFloat = 28
-
-        // Starting position for this black key within its octave
-        var position: CGFloat
-
-        switch patternInOctave {
-        case 0:  // C#
-            position = whiteKeyWidth + whiteKeySpacing - (blackKeyWidth / 2)
-        case 1:  // D#
-            position = 2 * (whiteKeyWidth + whiteKeySpacing) - (blackKeyWidth / 2)
-        case 2:  // F#
-            position = 3 * (whiteKeyWidth + whiteKeySpacing) - (blackKeyWidth / 2)
-        case 3:  // G#
-            position = 4 * (whiteKeyWidth + whiteKeySpacing) - (blackKeyWidth / 2)
-        case 4:  // A#
-            position = 5 * (whiteKeyWidth + whiteKeySpacing) - (blackKeyWidth / 2)
-        default:
-            position = 0
-        }
-
-        // Add octave offset (7 white keys per octave)
-        let octaveOffset = CGFloat(octaveNumber) * 7 * (whiteKeyWidth + whiteKeySpacing)
-
-        return octaveOffset + position
-    }
-
-    /// Initial offset for the black keys layer
-    private func blackKeyInitialOffset() -> CGFloat {
-        return 0
+        // Center the black key on this edge
+        return rightEdge - (blackKeyWidth / 2) - (whiteKeySpacing / 2)
     }
 }
