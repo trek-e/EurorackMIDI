@@ -1,7 +1,7 @@
 import SwiftUI
 import MIDIKitCore
 
-/// 2-octave piano keyboard with velocity-sensitive keys and octave controls
+/// Single-octave piano keyboard with velocity-sensitive keys and octave controls
 struct PianoKeyboardView: View {
     // MARK: - Properties
 
@@ -9,13 +9,13 @@ struct PianoKeyboardView: View {
     @State private var octaveOffset: Int = 0
 
     // Layout constants
-    private let whiteKeyWidth: CGFloat = 40
+    private let whiteKeyWidth: CGFloat = 44
     private let whiteKeySpacing: CGFloat = 2
-    private let blackKeyWidth: CGFloat = 28
+    private let blackKeyWidth: CGFloat = 30
 
     // Keyboard configuration
-    private let baseOctave: Int = 3  // Base octave C3
-    private let octaveSpan: Int = 2  // 2 octaves (C3-B4 by default)
+    private let baseOctave: Int = 4  // Base octave C4 (middle C)
+    private let octaveSpan: Int = 1  // 1 octave (C4-B4 by default)
     private let whiteKeysPerOctave: Int = 7  // C D E F G A B
 
     // MARK: - Computed Properties

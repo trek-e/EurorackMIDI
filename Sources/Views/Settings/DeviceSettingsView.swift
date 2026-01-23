@@ -1,5 +1,10 @@
 import SwiftUI
 import MIDIKitIO
+import UniformTypeIdentifiers
+
+#if os(macOS)
+import AppKit
+#endif
 
 /// Comprehensive settings UI for device profiles
 struct DeviceSettingsView: View {
@@ -11,7 +16,7 @@ struct DeviceSettingsView: View {
     @State private var profile: DeviceProfile
 
     // Navigation
-    @State private var showPresetList = false
+    @State private var showPresetSheet = false
 
     init(device: MIDIInputEndpoint, isPresented: Binding<Bool>) {
         self.device = device
@@ -119,6 +124,7 @@ struct DeviceSettingsView: View {
 
                 // Presets section
                 Section {
+                    #if os(iOS)
                     NavigationLink {
                         PresetListView(device: device, isPresented: $isPresented)
                     } label: {
@@ -129,6 +135,21 @@ struct DeviceSettingsView: View {
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    #else
+                    Button {
+                        showPresetSheet = true
+                    } label: {
+                        HStack {
+                            Label("Presets", systemImage: "star.fill")
+                            Spacer()
+                            Text("\(profileManager.namedPresets.count)")
+                                .foregroundStyle(.secondary)
+                            Image(systemName: "chevron.right")
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    #endif
                 } header: {
                     Text("Presets")
                 } footer: {
@@ -166,7 +187,10 @@ struct DeviceSettingsView: View {
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         #else
-        .frame(minWidth: 400, idealWidth: 500, minHeight: 500, idealHeight: 600)
+        .frame(width: 480, height: 550)
+        .sheet(isPresented: $showPresetSheet) {
+            PresetSheetView(device: device, isPresented: $showPresetSheet)
+        }
         #endif
     }
 
@@ -188,3 +212,186 @@ struct DeviceSettingsView: View {
         ToastManager.shared.show(message: "Settings reset to defaults", type: .info)
     }
 }
+
+// MARK: - macOS Preset Sheet
+
+#if os(macOS)
+/// Standalone preset sheet for macOS (avoids NavigationLink toolbar issues)
+struct PresetSheetView: View {
+    let device: MIDIInputEndpoint
+    @Binding var isPresented: Bool
+
+    @State private var profileManager = ProfileManager.shared
+    @State private var toastManager = ToastManager.shared
+    @State private var presets: [NamedPreset] = []
+    @State private var showCreatePreset = false
+    @State private var showImportPicker = false
+    @State private var presetToRename: NamedPreset?
+    @State private var newPresetName = ""
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Header with toolbar
+            HStack {
+                Button("Done") {
+                    isPresented = false
+                }
+                Spacer()
+                Text("Presets")
+                    .font(.headline)
+                Spacer()
+                Menu {
+                    Button {
+                        showCreatePreset = true
+                    } label: {
+                        Label("Create from Current", systemImage: "plus.circle")
+                    }
+                    Button {
+                        showImportPicker = true
+                    } label: {
+                        Label("Import JSON", systemImage: "square.and.arrow.down")
+                    }
+                } label: {
+                    Image(systemName: "plus")
+                }
+            }
+            .padding()
+
+            Divider()
+
+            // Content
+            if presets.isEmpty {
+                ContentUnavailableView {
+                    Label("No Presets", systemImage: "star.slash")
+                } description: {
+                    Text("Create a preset to save your current settings.")
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List(presets) { preset in
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(preset.name)
+                                .font(.headline)
+                            HStack(spacing: 8) {
+                                Text(preset.tag.displayName)
+                                Text("·")
+                                Text("Ch \(preset.profile.midiChannel)")
+                                Text("·")
+                                Text(preset.profile.velocityCurve.displayName)
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        }
+                        Spacer()
+                        Button("Apply") {
+                            profileManager.applyPreset(preset, to: device.uniqueID)
+                            toastManager.show(message: "Preset applied", type: .success)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                    .contextMenu {
+                        Button {
+                            profileManager.applyPreset(preset, to: device.uniqueID)
+                            toastManager.show(message: "Preset applied", type: .success)
+                        } label: {
+                            Label("Apply", systemImage: "checkmark.circle")
+                        }
+                        Button {
+                            exportPreset(preset)
+                        } label: {
+                            Label("Export JSON", systemImage: "square.and.arrow.up")
+                        }
+                        Button {
+                            presetToRename = preset
+                            newPresetName = preset.name
+                        } label: {
+                            Label("Rename", systemImage: "pencil")
+                        }
+                        Divider()
+                        Button(role: .destructive) {
+                            profileManager.deletePreset(id: preset.id)
+                            loadPresets()
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                }
+            }
+        }
+        .frame(width: 420, height: 400)
+        .sheet(isPresented: $showCreatePreset) {
+            CreatePresetSheet(
+                device: device,
+                isPresented: $showCreatePreset,
+                onCreate: { name, tag in
+                    let currentProfile = profileManager.profile(for: device.uniqueID)
+                    profileManager.createPreset(name: name, from: currentProfile, tag: tag)
+                    loadPresets()
+                    toastManager.show(message: "Preset created", type: .success)
+                }
+            )
+        }
+        .sheet(item: $presetToRename) { preset in
+            RenamePresetSheet(
+                preset: preset,
+                newName: $newPresetName,
+                onRename: { newName in
+                    profileManager.renamePreset(id: preset.id, to: newName)
+                    loadPresets()
+                    toastManager.show(message: "Preset renamed", type: .success)
+                }
+            )
+        }
+        .fileImporter(
+            isPresented: $showImportPicker,
+            allowedContentTypes: [.json],
+            allowsMultipleSelection: false
+        ) { result in
+            importPreset(result: result)
+        }
+        .onAppear {
+            loadPresets()
+        }
+    }
+
+    private func loadPresets() {
+        presets = profileManager.namedPresets
+    }
+
+    private func exportPreset(_ preset: NamedPreset) {
+        do {
+            let data = try ProfileDocument.exportProfile(preset.profile)
+            let filename = ProfileDocument.filename(for: preset.profile)
+
+            let savePanel = NSSavePanel()
+            savePanel.allowedContentTypes = [.json]
+            savePanel.nameFieldStringValue = filename
+
+            if savePanel.runModal() == .OK, let url = savePanel.url {
+                try data.write(to: url)
+                toastManager.show(message: "Preset exported", type: .success)
+            }
+        } catch {
+            toastManager.show(message: "Export failed", type: .error)
+        }
+    }
+
+    private func importPreset(result: Result<[URL], Error>) {
+        guard case .success(let urls) = result, let url = urls.first else { return }
+        do {
+            let accessing = url.startAccessingSecurityScopedResource()
+            defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+
+            let data = try Data(contentsOf: url)
+            let profile = try ProfileDocument.importProfile(from: data)
+            let name = url.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "_", with: " ")
+            profileManager.createPreset(name: name, from: profile, tag: .custom)
+            loadPresets()
+            toastManager.show(message: "Preset imported", type: .success)
+        } catch {
+            toastManager.show(message: "Import failed", type: .error)
+        }
+    }
+}
+#endif
