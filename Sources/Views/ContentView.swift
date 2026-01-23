@@ -35,6 +35,30 @@ struct ContentView: View {
                 title: toastManager.toastMessage
             )
         }
+        .alert("Restore Saved Settings?", isPresented: $manager.showRestoreSettingsPrompt) {
+            Button("Restore") {
+                manager.confirmRestoreSettings()
+            }
+            Button("Use Defaults", role: .cancel) {
+                manager.declineRestoreSettings()
+            }
+        } message: {
+            if let device = manager.pendingReconnectDevice {
+                Text("Reconnected to \(device.displayName). Would you like to restore your saved settings?")
+            }
+        }
+        .alert("Remember This Device?", isPresented: $manager.showRememberDevicePrompt) {
+            Button("Remember") {
+                manager.rememberCurrentDevice()
+            }
+            Button("Not Now", role: .cancel) {
+                manager.declineRememberDevice()
+            }
+        } message: {
+            if let device = manager.deviceToRemember {
+                Text("Save settings for \(device.displayName) and automatically reconnect in the future?")
+            }
+        }
     }
 
     private func alertToastType(for toastType: ToastType) -> AlertToast.AlertType {
