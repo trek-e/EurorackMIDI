@@ -10,23 +10,40 @@ struct ContentView: View {
     @State private var selectedTab = 0
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            PerformancePadsView()
-                .tabItem {
-                    Label("Pads", systemImage: "square.grid.3x3.fill")
-                }
-                .tag(0)
+        NavigationStack {
+            TabView(selection: $selectedTab) {
+                PerformancePadsView()
+                    .tabItem {
+                        Label("Pads", systemImage: "square.grid.3x3.fill")
+                    }
+                    .tag(0)
 
-            PianoKeyboardView()
-                .tabItem {
-                    Label("Keyboard", systemImage: "pianokeys")
+                PianoKeyboardView()
+                    .tabItem {
+                        Label("Keyboard", systemImage: "pianokeys")
+                    }
+                    .tag(1)
+            }
+            .navigationTitle("EurorackMIDI")
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                #if os(iOS)
+                ToolbarItem(placement: .topBarLeading) {
+                    DevicePickerView()
                 }
-                .tag(1)
-        }
-        .toolbar {
-            ToolbarItemGroup(placement: .automatic) {
-                DevicePickerView()
-                ChannelSelectorView()
+                ToolbarItem(placement: .topBarTrailing) {
+                    ChannelSelectorView()
+                }
+                #else
+                ToolbarItem(placement: .automatic) {
+                    DevicePickerView()
+                }
+                ToolbarItem(placement: .automatic) {
+                    ChannelSelectorView()
+                }
+                #endif
             }
         }
         .toast(isPresenting: $toastManager.showToast) {
