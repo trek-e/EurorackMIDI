@@ -3,6 +3,7 @@ import SwiftUI
 /// Main sequencer view containing grid, track selection, and controls
 struct SequencerView: View {
     @ObservedObject private var patternManager = PatternManager.shared
+    @State private var sequencerEngine = SequencerEngine.shared
     @State private var pattern: Pattern = Pattern.newPattern()
     @State private var selectedTrackIndex: Int = 0
     @State private var showPatternBrowser: Bool = false
@@ -53,12 +54,19 @@ struct SequencerView: View {
             )
         }
         .onChange(of: pattern) { _, newPattern in
+            // Sync pattern to sequencer engine for playback
+            sequencerEngine.activePattern = newPattern
+
             // Auto-save changes to the correct location
             if let location = editingPatternLocation {
                 // Pattern was loaded from browser - save back to same location
                 patternManager.savePattern(newPattern, bank: location.bank, slot: location.slot)
             }
             // If editingPatternLocation is nil, this is a new pattern - don't auto-save
+        }
+        .onAppear {
+            // Set initial pattern for sequencer engine
+            sequencerEngine.activePattern = pattern
         }
     }
 
