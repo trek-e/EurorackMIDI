@@ -272,12 +272,12 @@ final class ClockEngine {
     }
 
     private func updateTimerInterval() {
-        guard timer != nil else { return }
+        guard let currentTimer = timer else { return }
 
         let intervalSeconds = 60.0 / (bpm * Double(ppqn))
         // Must dispatch to clockQueue since timer runs there
-        clockQueue.async { [weak self] in
-            self?.timer?.schedule(
+        clockQueue.async {
+            currentTimer.schedule(
                 deadline: .now(),
                 repeating: intervalSeconds,
                 leeway: .nanoseconds(0)
