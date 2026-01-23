@@ -221,9 +221,8 @@ struct PresetSheetView: View {
     let device: MIDIInputEndpoint
     @Binding var isPresented: Bool
 
-    @State private var profileManager = ProfileManager.shared
+    @ObservedObject private var profileManager = ProfileManager.shared
     @State private var toastManager = ToastManager.shared
-    @State private var presets: [NamedPreset] = []
     @State private var showCreatePreset = false
     @State private var showImportPicker = false
     @State private var presetToRename: NamedPreset?
@@ -260,7 +259,7 @@ struct PresetSheetView: View {
             Divider()
 
             // Content
-            if presets.isEmpty {
+            if profileManager.namedPresets.isEmpty {
                 ContentUnavailableView {
                     Label("No Presets", systemImage: "star.slash")
                 } description: {
@@ -268,7 +267,7 @@ struct PresetSheetView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List(presets) { preset in
+                List(profileManager.namedPresets) { preset in
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(preset.name)
@@ -311,7 +310,6 @@ struct PresetSheetView: View {
                         Divider()
                         Button(role: .destructive) {
                             profileManager.deletePreset(id: preset.id)
-                            loadPresets()
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
@@ -327,7 +325,6 @@ struct PresetSheetView: View {
                 onCreate: { name, tag in
                     let currentProfile = profileManager.profile(for: device.uniqueID)
                     profileManager.createPreset(name: name, from: currentProfile, tag: tag)
-                    loadPresets()
                     toastManager.show(message: "Preset created", type: .success)
                 }
             )
@@ -338,7 +335,6 @@ struct PresetSheetView: View {
                 newName: $newPresetName,
                 onRename: { newName in
                     profileManager.renamePreset(id: preset.id, to: newName)
-                    loadPresets()
                     toastManager.show(message: "Preset renamed", type: .success)
                 }
             )
@@ -350,13 +346,6 @@ struct PresetSheetView: View {
         ) { result in
             importPreset(result: result)
         }
-        .onAppear {
-            loadPresets()
-        }
-    }
-
-    private func loadPresets() {
-        presets = profileManager.namedPresets
     }
 
     private func exportPreset(_ preset: NamedPreset) {
@@ -387,7 +376,6 @@ struct PresetSheetView: View {
             let profile = try ProfileDocument.importProfile(from: data)
             let name = url.deletingPathExtension().lastPathComponent.replacingOccurrences(of: "_", with: " ")
             profileManager.createPreset(name: name, from: profile, tag: .custom)
-            loadPresets()
             toastManager.show(message: "Preset imported", type: .success)
         } catch {
             toastManager.show(message: "Import failed", type: .error)

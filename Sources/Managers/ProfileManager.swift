@@ -1,5 +1,4 @@
 import Foundation
-import CloudStorage
 import SwiftUI
 import Combine
 
@@ -46,17 +45,22 @@ final class ProfileManager: ObservableObject {
         }
     }
 
-    // MARK: - Named presets (iCloud via CloudStorage)
+    // MARK: - Named presets (UserDefaults with iCloud backup)
 
-    @CloudStorage("namedPresets") private var presetsData: Data?
+    private let presetsKey = "namedPresets"
 
-    var namedPresets: [NamedPreset] {
-        get {
-            guard let data = presetsData else { return [] }
-            return (try? JSONDecoder().decode([NamedPreset].self, from: data)) ?? []
+    @Published private(set) var namedPresets: [NamedPreset] = []
+
+    private func loadPresetsFromStorage() {
+        if let data = UserDefaults.standard.data(forKey: presetsKey),
+           let presets = try? JSONDecoder().decode([NamedPreset].self, from: data) {
+            namedPresets = presets
         }
-        set {
-            presetsData = try? JSONEncoder().encode(newValue)
+    }
+
+    private func savePresetsToStorage() {
+        if let data = try? JSONEncoder().encode(namedPresets) {
+            UserDefaults.standard.set(data, forKey: presetsKey)
         }
     }
 
@@ -75,24 +79,21 @@ final class ProfileManager: ObservableObject {
             profile: presetProfile
         )
 
-        var presets = namedPresets
-        presets.append(preset)
-        namedPresets = presets
+        namedPresets.append(preset)
+        savePresetsToStorage()
     }
 
     /// Delete a named preset
     func deletePreset(id: UUID) {
-        var presets = namedPresets
-        presets.removeAll { $0.id == id }
-        namedPresets = presets
+        namedPresets.removeAll { $0.id == id }
+        savePresetsToStorage()
     }
 
     /// Rename a preset
     func renamePreset(id: UUID, to name: String) {
-        var presets = namedPresets
-        if let index = presets.firstIndex(where: { $0.id == id }) {
-            presets[index].name = name
-            namedPresets = presets
+        if let index = namedPresets.firstIndex(where: { $0.id == id }) {
+            namedPresets[index].name = name
+            savePresetsToStorage()
         }
     }
 
@@ -158,5 +159,7 @@ final class ProfileManager: ObservableObject {
         }
     }
 
-    private init() {}
+    private init() {
+        loadPresetsFromStorage()
+    }
 }

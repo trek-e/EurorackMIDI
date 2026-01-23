@@ -8,6 +8,10 @@ struct PianoKeyView: View {
     let note: UInt7
     let isBlackKey: Bool
     let manager: MIDIConnectionManager
+    var whiteKeyWidth: CGFloat = 50
+    var whiteKeyHeight: CGFloat = 180
+    var blackKeyWidth: CGFloat = 32
+    var blackKeyHeight: CGFloat = 110
 
     @State private var isPressed = false
 
@@ -15,16 +19,24 @@ struct PianoKeyView: View {
 
     var body: some View {
         Rectangle()
-            .fill(isPressed ? Color.blue : (isBlackKey ? Color.black : Color.white))
+            .fill(keyColor)
             .frame(
-                width: isBlackKey ? 28 : 40,
-                height: isBlackKey ? 80 : 120
+                width: isBlackKey ? blackKeyWidth : whiteKeyWidth,
+                height: isBlackKey ? blackKeyHeight : whiteKeyHeight
             )
             .overlay(
-                Rectangle()
-                    .strokeBorder(Color.black, lineWidth: 1)
+                RoundedRectangle(cornerRadius: isBlackKey ? 0 : 6)
+                    .strokeBorder(Color.gray.opacity(0.5), lineWidth: 1)
             )
-            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .clipShape(
+                UnevenRoundedRectangle(
+                    topLeadingRadius: 0,
+                    bottomLeadingRadius: isBlackKey ? 4 : 6,
+                    bottomTrailingRadius: isBlackKey ? 4 : 6,
+                    topTrailingRadius: 0
+                )
+            )
+            .shadow(color: .black.opacity(0.3), radius: isBlackKey ? 2 : 1, y: isBlackKey ? 2 : 1)
             .highPriorityGesture(
                 DragGesture(minimumDistance: 0)
                     .onChanged { value in
@@ -50,5 +62,12 @@ struct PianoKeyView: View {
                         isPressed = false
                     }
             )
+    }
+
+    private var keyColor: Color {
+        if isPressed {
+            return isBlackKey ? Color.blue.opacity(0.8) : Color.blue.opacity(0.3)
+        }
+        return isBlackKey ? Color.black : Color.white
     }
 }

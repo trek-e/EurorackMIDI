@@ -8,10 +8,12 @@ struct PianoKeyboardView: View {
     @State private var manager = MIDIConnectionManager.shared
     @State private var octaveOffset: Int = 0
 
-    // Layout constants
-    private let whiteKeyWidth: CGFloat = 44
+    // Layout constants - realistic piano key proportions
+    private let whiteKeyWidth: CGFloat = 50
+    private let whiteKeyHeight: CGFloat = 180
     private let whiteKeySpacing: CGFloat = 2
-    private let blackKeyWidth: CGFloat = 30
+    private let blackKeyWidth: CGFloat = 32
+    private let blackKeyHeight: CGFloat = 110
 
     // Keyboard configuration
     private let baseOctave: Int = 4  // Base octave C4 (middle C)
@@ -58,7 +60,7 @@ struct PianoKeyboardView: View {
     // MARK: - Body
 
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 16) {
             // Octave controls
             OctaveControlsView(
                 octaveOffset: $octaveOffset,
@@ -67,32 +69,41 @@ struct PianoKeyboardView: View {
             )
             .padding(.horizontal)
 
-            // Keyboard
-            ScrollView(.horizontal, showsIndicators: false) {
-                ZStack(alignment: .topLeading) {
-                    // White keys layer
-                    HStack(spacing: whiteKeySpacing) {
-                        ForEach(whiteKeyNotes, id: \.self) { note in
-                            PianoKeyView(
-                                note: note,
-                                isBlackKey: false,
-                                manager: manager
-                            )
-                        }
-                    }
-
-                    // Black keys layer - each positioned absolutely
-                    ForEach(blackKeyData, id: \.note) { data in
+            // Keyboard - centered
+            ZStack(alignment: .topLeading) {
+                // White keys layer
+                HStack(spacing: whiteKeySpacing) {
+                    ForEach(whiteKeyNotes, id: \.self) { note in
                         PianoKeyView(
-                            note: data.note,
-                            isBlackKey: true,
-                            manager: manager
+                            note: note,
+                            isBlackKey: false,
+                            manager: manager,
+                            whiteKeyWidth: whiteKeyWidth,
+                            whiteKeyHeight: whiteKeyHeight,
+                            blackKeyWidth: blackKeyWidth,
+                            blackKeyHeight: blackKeyHeight
                         )
-                        .offset(x: blackKeyXPosition(afterWhiteIndex: data.afterWhiteIndex))
                     }
                 }
-                .padding()
+
+                // Black keys layer - each positioned absolutely
+                ForEach(blackKeyData, id: \.note) { data in
+                    PianoKeyView(
+                        note: data.note,
+                        isBlackKey: true,
+                        manager: manager,
+                        whiteKeyWidth: whiteKeyWidth,
+                        whiteKeyHeight: whiteKeyHeight,
+                        blackKeyWidth: blackKeyWidth,
+                        blackKeyHeight: blackKeyHeight
+                    )
+                    .offset(x: blackKeyXPosition(afterWhiteIndex: data.afterWhiteIndex))
+                }
             }
+            .padding()
+            .frame(maxWidth: .infinity)
+
+            Spacer()
         }
     }
 
