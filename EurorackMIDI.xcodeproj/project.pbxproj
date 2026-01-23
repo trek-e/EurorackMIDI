@@ -1,0 +1,455 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A1000001246813570000001 /* EurorackMIDIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002246813570000001 /* EurorackMIDIApp.swift */; };
+		A1000003246813570000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000004246813570000001 /* ContentView.swift */; };
+		A1000005246813570000001 /* DevicePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000006246813570000001 /* DevicePickerView.swift */; };
+		A1000007246813570000001 /* ChannelSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000008246813570000001 /* ChannelSelectorView.swift */; };
+		A1000009246813570000001 /* MIDIConnectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000A246813570000001 /* MIDIConnectionManager.swift */; };
+		A100000B246813570000001 /* ToastManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000C246813570000001 /* ToastManager.swift */; };
+		A100000D246813570000001 /* MIDIChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000E246813570000001 /* MIDIChannel.swift */; };
+		A100000F246813570000001 /* MIDIConnectionError.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000010246813570000001 /* MIDIConnectionError.swift */; };
+		A1000011246813570000001 /* MIDIKitIO in Frameworks */ = {isa = PBXBuildFile; productRef = A1000012246813570000001 /* MIDIKitIO */; };
+		A1000013246813570000001 /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = A1000014246813570000001 /* AlertToast */; };
+		A1000040246813570000001 /* PadButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000041246813570000001 /* PadButtonView.swift */; };
+		A1000042246813570000001 /* PerformancePadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000043246813570000001 /* PerformancePadsView.swift */; };
+		A1000044246813570000001 /* PianoKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000045246813570000001 /* PianoKeyView.swift */; };
+		A1000046246813570000001 /* PianoKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000047246813570000001 /* PianoKeyboardView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A1000002246813570000001 /* EurorackMIDIApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EurorackMIDIApp.swift; sourceTree = "<group>"; };
+		A1000004246813570000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A1000006246813570000001 /* DevicePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevicePickerView.swift; sourceTree = "<group>"; };
+		A1000008246813570000001 /* ChannelSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChannelSelectorView.swift; sourceTree = "<group>"; };
+		A100000A246813570000001 /* MIDIConnectionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MIDIConnectionManager.swift; sourceTree = "<group>"; };
+		A100000C246813570000001 /* ToastManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastManager.swift; sourceTree = "<group>"; };
+		A100000E246813570000001 /* MIDIChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MIDIChannel.swift; sourceTree = "<group>"; };
+		A1000010246813570000001 /* MIDIConnectionError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MIDIConnectionError.swift; sourceTree = "<group>"; };
+		A1000020246813570000001 /* EurorackMIDI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EurorackMIDI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1000041246813570000001 /* PadButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PadButtonView.swift; sourceTree = "<group>"; };
+		A1000043246813570000001 /* PerformancePadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformancePadsView.swift; sourceTree = "<group>"; };
+		A1000045246813570000001 /* PianoKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PianoKeyView.swift; sourceTree = "<group>"; };
+		A1000047246813570000001 /* PianoKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PianoKeyboardView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A100001D246813570000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000011246813570000001 /* MIDIKitIO in Frameworks */,
+				A1000013246813570000001 /* AlertToast in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A1000015246813570000001 = {
+			isa = PBXGroup;
+			children = (
+				A1000016246813570000001 /* Sources */,
+				A100001F246813570000001 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A1000016246813570000001 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				A1000017246813570000001 /* App */,
+				A1000018246813570000001 /* Views */,
+				A1000019246813570000001 /* Managers */,
+				A100001A246813570000001 /* Models */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		A1000017246813570000001 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A1000002246813570000001 /* EurorackMIDIApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A1000018246813570000001 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A1000004246813570000001 /* ContentView.swift */,
+				A1000006246813570000001 /* DevicePickerView.swift */,
+				A1000008246813570000001 /* ChannelSelectorView.swift */,
+				A1000048246813570000001 /* ControlSurfaces */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A1000048246813570000001 /* ControlSurfaces */ = {
+			isa = PBXGroup;
+			children = (
+				A1000041246813570000001 /* PadButtonView.swift */,
+				A1000043246813570000001 /* PerformancePadsView.swift */,
+				A1000045246813570000001 /* PianoKeyView.swift */,
+				A1000047246813570000001 /* PianoKeyboardView.swift */,
+			);
+			path = ControlSurfaces;
+			sourceTree = "<group>";
+		};
+		A1000019246813570000001 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				A100000A246813570000001 /* MIDIConnectionManager.swift */,
+				A100000C246813570000001 /* ToastManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		A100001A246813570000001 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A100000E246813570000001 /* MIDIChannel.swift */,
+				A1000010246813570000001 /* MIDIConnectionError.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A100001F246813570000001 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A1000020246813570000001 /* EurorackMIDI.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A100001B246813570000001 /* EurorackMIDI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A1000024246813570000001 /* Build configuration list for PBXNativeTarget "EurorackMIDI" */;
+			buildPhases = (
+				A100001C246813570000001 /* Sources */,
+				A100001D246813570000001 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EurorackMIDI;
+			packageProductDependencies = (
+				A1000012246813570000001 /* MIDIKitIO */,
+				A1000014246813570000001 /* AlertToast */,
+			);
+			productName = EurorackMIDI;
+			productReference = A1000020246813570000001 /* EurorackMIDI.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A1000021246813570000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					A100001B246813570000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = A1000022246813570000001 /* Build configuration list for PBXProject "EurorackMIDI" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A1000015246813570000001;
+			packageReferences = (
+				A1000030246813570000001 /* XCRemoteSwiftPackageReference "MIDIKit" */,
+				A1000031246813570000001 /* XCRemoteSwiftPackageReference "AlertToast" */,
+			);
+			productRefGroup = A100001F246813570000001 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A100001B246813570000001 /* EurorackMIDI */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A100001C246813570000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000001246813570000001 /* EurorackMIDIApp.swift in Sources */,
+				A1000003246813570000001 /* ContentView.swift in Sources */,
+				A1000005246813570000001 /* DevicePickerView.swift in Sources */,
+				A1000007246813570000001 /* ChannelSelectorView.swift in Sources */,
+				A1000009246813570000001 /* MIDIConnectionManager.swift in Sources */,
+				A100000B246813570000001 /* ToastManager.swift in Sources */,
+				A100000D246813570000001 /* MIDIChannel.swift in Sources */,
+				A100000F246813570000001 /* MIDIConnectionError.swift in Sources */,
+				A1000040246813570000001 /* PadButtonView.swift in Sources */,
+				A1000042246813570000001 /* PerformancePadsView.swift in Sources */,
+				A1000044246813570000001 /* PianoKeyView.swift in Sources */,
+				A1000046246813570000001 /* PianoKeyboardView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A1000025246813570000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A1000026246813570000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		A1000027246813570000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = EurorackMIDI;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eurorack.midi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A1000028246813570000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = EurorackMIDI;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.eurorack.midi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A1000022246813570000001 /* Build configuration list for PBXProject "EurorackMIDI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000025246813570000001 /* Debug */,
+				A1000026246813570000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A1000024246813570000001 /* Build configuration list for PBXNativeTarget "EurorackMIDI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A1000027246813570000001 /* Debug */,
+				A1000028246813570000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A1000030246813570000001 /* XCRemoteSwiftPackageReference "MIDIKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/orchetect/MIDIKit";
+			requirement = {
+				kind = exactVersion;
+				version = 0.10.7;
+			};
+		};
+		A1000031246813570000001 /* XCRemoteSwiftPackageReference "AlertToast" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/elai950/AlertToast";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A1000012246813570000001 /* MIDIKitIO */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1000030246813570000001 /* XCRemoteSwiftPackageReference "MIDIKit" */;
+			productName = MIDIKitIO;
+		};
+		A1000014246813570000001 /* AlertToast */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A1000031246813570000001 /* XCRemoteSwiftPackageReference "AlertToast" */;
+			productName = AlertToast;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A1000021246813570000001 /* Project object */;
+}
