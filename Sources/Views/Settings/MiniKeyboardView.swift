@@ -2,7 +2,7 @@ import SwiftUI
 import MIDIKitCore
 import MIDIKitIO
 
-/// Compact keyboard for testing velocity settings
+/// Compact keyboard for testing velocity settings (one octave: C4 to B4)
 struct MiniKeyboardView: View {
     let velocityCurve: VelocityCurve
     let fixedVelocity: Int?
@@ -12,95 +12,143 @@ struct MiniKeyboardView: View {
     @State private var activeKey: Int? = nil
     @State private var lastVelocity: Int? = nil
 
-    // 12 keys: C, C#, D, D#, E, F, F#, G, G#, A, A#, B (one octave starting at C4)
     private let baseNote = 60 // C4
-    private let whiteKeys = [0, 2, 4, 5, 7, 9, 11] // C, D, E, F, G, A, B
-    private let blackKeys = [1, 3, 6, 8, 10] // C#, D#, F#, G#, A#
+
+    // Key dimensions
+    private let whiteW: CGFloat = 32
+    private let whiteH: CGFloat = 70
+    private let blackW: CGFloat = 20
+    private let blackH: CGFloat = 42
+    private let gap: CGFloat = 1
+
+    // White keys: C=0, D=2, E=4, F=5, G=7, A=9, B=11
+    private let whiteNotes = [0, 2, 4, 5, 7, 9, 11]
+
+    // Black keys: (semitone, after which white key index)
+    private let blackKeys: [(semitone: Int, afterIndex: Int)] = [
+        (1, 0),  // C#
+        (3, 1),  // D#
+        (6, 3),  // F#
+        (8, 4),  // G#
+        (10, 5)  // A#
+    ]
 
     var body: some View {
         VStack(spacing: 8) {
-            // Velocity indicator
             if let velocity = lastVelocity {
                 Text("Velocity: \(velocity)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
-            // Mini keyboard
-            GeometryReader { geometry in
-                ZStack {
-                    // White keys
-                    HStack(spacing: 1) {
-                        ForEach(whiteKeys, id: \.self) { offset in
-                            keyView(note: baseNote + offset, isBlack: false, width: geometry.size.width / 7)
-                        }
-                    }
+            // Fixed-size keyboard
+            let totalWidth = CGFloat(whiteNotes.count) * whiteW + CGFloat(whiteNotes.count - 1) * gap
 
-                    // Black keys overlay
-                    HStack(spacing: 0) {
-                        ForEach(0..<7) { index in
-                            let offset = whiteKeys[index]
-                            if blackKeys.contains(offset + 1) {
-                                HStack(spacing: 0) {
-                                    Spacer()
-                                        .frame(width: (geometry.size.width / 7) * 0.65)
-                                    keyView(note: baseNote + offset + 1, isBlack: true, width: (geometry.size.width / 7) * 0.7)
-                                        .zIndex(1)
-                                    Spacer()
-                                        .frame(width: (geometry.size.width / 7) * 0.65)
-                                }
-                            } else {
-                                Spacer()
-                                    .frame(width: geometry.size.width / 7)
-                            }
-                        }
+            ZStack(alignment: .topLeading) {
+                // White keys
+                HStack(spacing: gap) {
+                    ForEach(whiteNotes, id: \.self) { semitone in
+                        MiniWhiteKey(
+                            note: baseNote + semitone,
+                            isActive: activeKey == baseNote + semitone,
+                            width: whiteW,
+                            height: whiteH,
+                            onPress: { triggerNote($0) },
+                            onRelease: { releaseNote($0) },
+                            setActive: { activeKey = $0 }
+                        )
                     }
                 }
+
+                // Black keys
+                ForEach(blackKeys, id: \.semitone) { key in
+                    MiniBlackKey(
+                        note: baseNote + key.semitone,
+                        isActive: activeKey == baseNote + key.semitone,
+                        width: blackW,
+                        height: blackH,
+                        onPress: { triggerNote($0) },
+                        onRelease: { releaseNote($0) },
+                        setActive: { activeKey = $0 }
+                    )
+                    .position(
+                        x: CGFloat(key.afterIndex + 1) * (whiteW + gap) - gap / 2,
+                        y: blackH / 2
+                    )
+                }
             }
-            .frame(height: 80)
+            .frame(width: totalWidth, height: whiteH)
+            .background(Color(white: 0.2))
+            .clipShape(RoundedRectangle(cornerRadius: 4))
         }
     }
 
-    private func keyView(note: Int, isBlack: Bool, width: CGFloat) -> some View {
-        let isActive = activeKey == note
-
-        return Rectangle()
-            .fill(isBlack ? (isActive ? Color.gray : Color.black) : (isActive ? Color.blue.opacity(0.3) : Color.white))
-            .overlay(
-                Rectangle()
-                    .stroke(Color.gray, lineWidth: 1)
-            )
-            .frame(width: width, height: isBlack ? 50 : 80)
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        if activeKey != note {
-                            activeKey = note
-                            triggerNote(note, location: value.location, in: isBlack ? 50 : 80)
-                        }
-                    }
-                    .onEnded { _ in
-                        if activeKey == note {
-                            releaseNote(note)
-                            activeKey = nil
-                        }
-                    }
-            )
-    }
-
-    private func triggerNote(_ note: Int, location: CGPoint, in height: CGFloat) {
-        // Calculate velocity from vertical position (top = soft, bottom = hard)
-        let normalizedInput = max(0.0, min(1.0, location.y / height))
-        let velocity = velocityCurve.toMIDIVelocity(from: normalizedInput, fixedValue: fixedVelocity)
-
+    private func triggerNote(_ note: Int) {
+        let velocity = velocityCurve.toMIDIVelocity(from: 0.7, fixedValue: fixedVelocity)
         lastVelocity = Int(velocity)
-
-        // Send MIDI Note On
         try? manager.sendNoteOn(note: UInt7(clamping: note), velocity: velocity)
     }
 
     private func releaseNote(_ note: Int) {
-        // Send MIDI Note Off
         try? manager.sendNoteOff(note: UInt7(clamping: note))
+    }
+}
+
+struct MiniWhiteKey: View {
+    let note: Int
+    let isActive: Bool
+    let width: CGFloat
+    let height: CGFloat
+    let onPress: (Int) -> Void
+    let onRelease: (Int) -> Void
+    let setActive: (Int?) -> Void
+
+    var body: some View {
+        Rectangle()
+            .fill(isActive ? Color.blue.opacity(0.3) : Color.white)
+            .frame(width: width, height: height)
+            .border(Color.gray.opacity(0.5), width: 0.5)
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isActive {
+                            setActive(note)
+                            onPress(note)
+                        }
+                    }
+                    .onEnded { _ in
+                        onRelease(note)
+                        setActive(nil)
+                    }
+            )
+    }
+}
+
+struct MiniBlackKey: View {
+    let note: Int
+    let isActive: Bool
+    let width: CGFloat
+    let height: CGFloat
+    let onPress: (Int) -> Void
+    let onRelease: (Int) -> Void
+    let setActive: (Int?) -> Void
+
+    var body: some View {
+        Rectangle()
+            .fill(isActive ? Color.blue : Color.black)
+            .frame(width: width, height: height)
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isActive {
+                            setActive(note)
+                            onPress(note)
+                        }
+                    }
+                    .onEnded { _ in
+                        onRelease(note)
+                        setActive(nil)
+                    }
+            )
     }
 }
