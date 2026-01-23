@@ -19,7 +19,6 @@
 		A1000013246813570000001 /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = A1000014246813570000001 /* AlertToast */; };
 		A1000040246813570000001 /* PadButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000041246813570000001 /* PadButtonView.swift */; };
 		A1000042246813570000001 /* PerformancePadsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000043246813570000001 /* PerformancePadsView.swift */; };
-		A1000044246813570000001 /* PianoKeyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000045246813570000001 /* PianoKeyView.swift */; };
 		A1000046246813570000001 /* PianoKeyboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000047246813570000001 /* PianoKeyboardView.swift */; };
 		A1000049246813570000001 /* OctaveControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100004A246813570000001 /* OctaveControlsView.swift */; };
 		A19BE1965E725C439D90 /* ProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1FBDAA49A61AE4EB9BB /* ProfileManager.swift */; };
@@ -48,7 +47,6 @@
 		A1000020246813570000001 /* EurorackMIDI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EurorackMIDI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000041246813570000001 /* PadButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PadButtonView.swift; sourceTree = "<group>"; };
 		A1000043246813570000001 /* PerformancePadsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformancePadsView.swift; sourceTree = "<group>"; };
-		A1000045246813570000001 /* PianoKeyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PianoKeyView.swift; sourceTree = "<group>"; };
 		A1000047246813570000001 /* PianoKeyboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PianoKeyboardView.swift; sourceTree = "<group>"; };
 		A100004A246813570000001 /* OctaveControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OctaveControlsView.swift; sourceTree = "<group>"; };
 		A1FBDAA49A61AE4EB9BB /* ProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileManager.swift; sourceTree = "<group>"; };
@@ -123,7 +121,6 @@
 			children = (
 				A1000041246813570000001 /* PadButtonView.swift */,
 				A1000043246813570000001 /* PerformancePadsView.swift */,
-				A1000045246813570000001 /* PianoKeyView.swift */,
 				A1000047246813570000001 /* PianoKeyboardView.swift */,
 				A100004A246813570000001 /* OctaveControlsView.swift */,
 			);
@@ -258,7 +255,6 @@
 				A100000F246813570000001 /* MIDIConnectionError.swift in Sources */,
 				A1000040246813570000001 /* PadButtonView.swift in Sources */,
 				A1000042246813570000001 /* PerformancePadsView.swift in Sources */,
-				A1000044246813570000001 /* PianoKeyView.swift in Sources */,
 				A1000046246813570000001 /* PianoKeyboardView.swift in Sources */,
 				A1000049246813570000001 /* OctaveControlsView.swift in Sources */,
 				A19BE1965E725C439D90 /* ProfileManager.swift in Sources */,
