@@ -8,6 +8,8 @@ struct PadButtonView: View {
     let note: UInt7
     let label: String
     let manager: MIDIConnectionManager
+    let velocityCurve: VelocityCurve
+    let fixedVelocity: Int?
 
     @State private var isPressed = false
 
@@ -34,7 +36,7 @@ struct PadButtonView: View {
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
                     if !isPressed {
-                        try? manager.sendNoteOn(note: note, velocity: 100)
+                        try? manager.sendNoteOn(note: note, velocity: velocityCurve.toMIDIVelocity(from: 1.0, fixedValue: fixedVelocity))
                         isPressed = true
                     }
                 }
