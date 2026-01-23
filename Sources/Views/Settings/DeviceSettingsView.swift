@@ -187,7 +187,8 @@ struct DeviceSettingsView: View {
         .presentationDetents([.large])
         .presentationDragIndicator(.visible)
         #else
-        .frame(width: 480, height: 550)
+        .frame(minWidth: 500, minHeight: 600)
+        .padding(.top, 8)
         .sheet(isPresented: $showPresetSheet) {
             PresetSheetView(device: device, isPresented: $showPresetSheet)
         }
