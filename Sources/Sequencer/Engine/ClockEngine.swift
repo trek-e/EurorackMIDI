@@ -39,6 +39,11 @@ enum ClockMode: String, CaseIterable {
 @Observable
 @MainActor
 final class ClockEngine {
+    // MARK: - Singleton
+
+    /// Shared singleton instance
+    static let shared = ClockEngine()
+
     // MARK: - Public Properties
 
     /// Tempo in beats per minute (clamped to 20-300)
@@ -60,7 +65,7 @@ final class ClockEngine {
     private(set) var transportState: TransportState = .stopped
 
     /// Available PPQN options for UI picker
-    let ppqnOptions = [24, 48, 96]
+    static let ppqnOptions = [24, 48, 96]
 
     /// Clock behavior mode
     var clockMode: ClockMode = .auto
