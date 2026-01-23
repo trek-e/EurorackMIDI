@@ -73,6 +73,9 @@ final class ClockEngine {
     /// Whether clock is currently sending pulses (separate from transport for manual mode)
     private(set) var isClockRunning: Bool = false
 
+    /// Callback invoked on each clock tick (for sequencer synchronization)
+    var onTick: (() -> Void)?
+
     /// Clock interval in milliseconds (for debugging)
     var clockIntervalMs: Double {
         (60.0 / (bpm * Double(ppqn))) * 1000.0
@@ -284,6 +287,9 @@ final class ClockEngine {
         if tickCount % clocksPerMidiBeat == 0 {
             currentBeat += 1
         }
+
+        // Notify sequencer engine of each tick
+        onTick?()
     }
 
     // MARK: - MIDI Event Sending
