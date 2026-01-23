@@ -29,6 +29,23 @@ final class MIDIConnectionManager {
         midiManager.endpoints.inputs
     }
 
+    // MARK: - Auto-reconnect and Profile Management
+
+    /// Pending device for restore settings prompt
+    var pendingReconnectDevice: MIDIInputEndpoint?
+
+    /// Show restore settings prompt when reconnecting to remembered device
+    var showRestoreSettingsPrompt: Bool = false
+
+    /// Show remember device prompt for new device connections
+    var showRememberDevicePrompt: Bool = false
+
+    /// Device to remember (pending user confirmation)
+    var deviceToRemember: MIDIInputEndpoint?
+
+    /// Currently loaded profile
+    var currentProfile: DeviceProfile?
+
     // MARK: - Initialization
 
     private init() {
@@ -167,5 +184,91 @@ final class MIDIConnectionManager {
         try sendNoteOn(note: testNote, velocity: 64)
         try await Task.sleep(nanoseconds: 200_000_000) // 200ms
         try sendNoteOff(note: testNote)
+    }
+
+    // MARK: - Auto-reconnect
+
+    /// Attempt to reconnect to last connected device on app launch
+    @MainActor
+    func attemptAutoReconnect() {
+        // Check if there's a last connected device
+        guard let lastDeviceID = ProfileManager.shared.lastConnectedDeviceID else {
+            return
+        }
+
+        // Search for the device in available destinations
+        guard let device = availableDestinations.first(where: { $0.uniqueID == lastDeviceID }) else {
+            // Device not currently available
+            return
+        }
+
+        // Set selected device and update connection
+        selectedDevice = device
+        updateOutputConnection()
+
+        // Store device for pending restore settings prompt
+        pendingReconnectDevice = device
+        showRestoreSettingsPrompt = true
+    }
+
+    /// Apply a profile to the current connection
+    func applyProfile(_ profile: DeviceProfile) {
+        // Apply MIDI channel (convert 1-indexed to 0-indexed)
+        selectedChannel = MIDIChannel(profile.midiChannel - 1)
+
+        // Store current profile reference
+        currentProfile = profile
+    }
+
+    /// Confirm restore settings from saved profile
+    @MainActor
+    func confirmRestoreSettings() {
+        guard let device = pendingReconnectDevice else { return }
+
+        // Load profile and apply settings
+        let profile = ProfileManager.shared.profile(for: device.uniqueID)
+        applyProfile(profile)
+
+        // Clear prompt state
+        showRestoreSettingsPrompt = false
+        pendingReconnectDevice = nil
+
+        ToastManager.shared.show(message: "Settings restored", type: .success)
+    }
+
+    /// Decline restore settings (use defaults)
+    func declineRestoreSettings() {
+        // Clear prompt state without applying profile
+        showRestoreSettingsPrompt = false
+        pendingReconnectDevice = nil
+    }
+
+    /// Remember current device
+    @MainActor
+    func rememberCurrentDevice() {
+        guard let device = deviceToRemember else { return }
+
+        // Remember the device
+        ProfileManager.shared.rememberDevice(id: device.uniqueID, name: device.displayName)
+
+        // Save current state as profile
+        let profile = DeviceProfile(
+            deviceUniqueID: device.uniqueID,
+            deviceDisplayName: device.displayName,
+            midiChannel: Int(selectedChannel) + 1 // Convert 0-indexed to 1-indexed
+        )
+        ProfileManager.shared.saveProfile(profile, for: device.uniqueID)
+
+        // Clear prompt state
+        showRememberDevicePrompt = false
+        deviceToRemember = nil
+
+        ToastManager.shared.show(message: "Device remembered", type: .success)
+    }
+
+    /// Decline remembering device
+    func declineRememberDevice() {
+        showRememberDevicePrompt = false
+        deviceToRemember = nil
     }
 }
