@@ -2,6 +2,36 @@ import Foundation
 import MIDIKitCore
 import Observation
 
+/// Clock behavior mode for transport/clock relationship
+enum ClockMode: String, CaseIterable {
+    /// Clock starts/stops automatically with transport
+    case auto
+
+    /// Clock controlled via separate button (independent of transport)
+    case manual
+
+    /// Clock always running regardless of transport state
+    case always
+
+    /// Display name for UI
+    var displayName: String {
+        switch self {
+        case .auto: return "Auto"
+        case .manual: return "Manual"
+        case .always: return "Always"
+        }
+    }
+
+    /// Description for UI
+    var description: String {
+        switch self {
+        case .auto: return "Clock follows transport"
+        case .manual: return "Clock controlled separately"
+        case .always: return "Clock runs continuously"
+        }
+    }
+}
+
 /// MIDI clock engine for generating tempo-synced clock signals
 ///
 /// Sends MIDI clock events at configurable BPM and PPQN resolution.
@@ -31,6 +61,12 @@ final class ClockEngine {
 
     /// Available PPQN options for UI picker
     let ppqnOptions = [24, 48, 96]
+
+    /// Clock behavior mode
+    var clockMode: ClockMode = .auto
+
+    /// Whether clock is currently sending pulses (separate from transport for manual mode)
+    private(set) var isClockRunning: Bool = false
 
     /// Clock interval in milliseconds (for debugging)
     var clockIntervalMs: Double {
@@ -101,17 +137,25 @@ final class ClockEngine {
         // Send MIDI Start message
         sendStart()
 
-        // Create and start timer
-        startTimer()
+        // Start clock based on mode
+        if clockMode == .auto {
+            isClockRunning = true
+            startTimer()
+        }
+        // In manual/always mode, clock is controlled separately
     }
 
     /// Stop clock
     func stop() {
         guard transportState != .stopped else { return }
 
-        // Cancel timer first
-        timer?.cancel()
-        timer = nil
+        // Stop clock based on mode
+        if clockMode == .auto {
+            timer?.cancel()
+            timer = nil
+            isClockRunning = false
+        }
+        // In manual/always mode, clock continues running
 
         transportState = .stopped
 
@@ -128,8 +172,11 @@ final class ClockEngine {
         // Send MIDI Continue message
         sendContinue()
 
-        // Resume timer
-        startTimer()
+        // Resume clock based on mode
+        if clockMode == .auto && !isClockRunning {
+            isClockRunning = true
+            startTimer()
+        }
     }
 
     /// Toggle between playing and stopped
@@ -139,6 +186,54 @@ final class ClockEngine {
         } else {
             stop()
         }
+    }
+
+    // MARK: - Clock Control (for manual/always modes)
+
+    /// Start clock only (without affecting transport state)
+    /// Used in manual or always clock modes
+    func startClock() {
+        guard !isClockRunning else { return }
+
+        isClockRunning = true
+        startTimer()
+    }
+
+    /// Stop clock only (without affecting transport state)
+    /// Used in manual clock mode
+    func stopClock() {
+        guard isClockRunning else { return }
+
+        timer?.cancel()
+        timer = nil
+        isClockRunning = false
+    }
+
+    /// Toggle clock on/off (for manual mode button)
+    func toggleClock() {
+        if isClockRunning {
+            stopClock()
+        } else {
+            startClock()
+        }
+    }
+
+    /// Set transport position by MIDI beat number
+    /// - Parameter midiBeat: Position in MIDI beats (1 beat = 6 MIDI clocks)
+    func setPosition(midiBeat: Int) {
+        currentBeat = midiBeat
+        // Calculate tick count from beat position
+        let clocksPerMidiBeat = ppqn / 4
+        tickCount = midiBeat * clocksPerMidiBeat
+
+        // Send song position pointer to external gear
+        sendSongPositionPointer()
+    }
+
+    /// Reset position to start
+    func rewind() {
+        tickCount = 0
+        currentBeat = 0
     }
 
     // MARK: - Private Methods
