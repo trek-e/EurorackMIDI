@@ -60,6 +60,9 @@ Recent decisions affecting current work:
 - **04-04**: ClockEngine.shared singleton for view observation
 - **04-04**: Static ppqnOptions for picker data
 - **04-04**: SequencerTabView as container pattern for step sequencer
+- **04-05**: Canvas + .drawingGroup() for Metal-backed piano roll rendering
+- **04-05**: Long-press gesture opens NoteEditorView for velocity/duration
+- **04-05**: editingPatternLocation tracks bank/slot for auto-save persistence
 - **04-06**: onTick closure on ClockEngine for sequencer synchronization
 - **04-06**: PatternBrowserView.onSelect returns (Pattern, (bank, slot)) tuple
 - **04-06**: Performance trigger modes: toggle/oneShot/momentary per pattern
