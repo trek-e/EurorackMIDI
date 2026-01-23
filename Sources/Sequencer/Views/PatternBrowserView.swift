@@ -312,9 +312,7 @@ struct PerformancePadButton: View {
 
 struct PatternBrowserView_Previews: PreviewProvider {
     static var previews: some View {
-        PatternBrowserView { pattern, location in
-            print("Selected: \(pattern.name) at bank \(location.bank), slot \(location.slot)")
-        }
+        PatternBrowserView { _, _ in }
     }
 }
 

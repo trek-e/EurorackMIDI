@@ -45,16 +45,19 @@ struct PatternBank: Codable, Identifiable {
 
     /// Bank letter (A, B, C, D)
     var letter: String {
-        String(UnicodeScalar(65 + index)!)  // ASCII: A=65
+        let letters = ["A", "B", "C", "D", "E", "F", "G", "H"]
+        guard index >= 0 && index < letters.count else { return "?" }
+        return letters[index]
     }
 }
 
 // MARK: - Default Banks
 extension PatternBank {
     static func defaultBanks() -> [PatternBank] {
-        (0..<bankCount).map { index in
+        let letters = ["A", "B", "C", "D"]
+        return (0..<bankCount).map { index in
             PatternBank(
-                name: "Bank \(String(UnicodeScalar(65 + index)!))",
+                name: "Bank \(letters[index])",
                 index: index
             )
         }

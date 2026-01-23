@@ -2,6 +2,9 @@ import Foundation
 import Combine
 import MIDIKitCore
 import Observation
+import os.log
+
+private let logger = Logger(subsystem: "com.eurorack.midi", category: "SequencerEngine")
 
 /// Engine for playing back patterns synchronized to clock
 @Observable
@@ -123,7 +126,7 @@ final class SequencerEngine {
         do {
             try MIDIConnectionManager.shared.sendNoteOn(note: midiNote, velocity: adjustedVelocity)
         } catch {
-            print("SequencerEngine: Failed to send note on: \(error)")
+            logger.debug("Failed to send note on: \(error.localizedDescription)")
         }
 
         // Calculate when to send note-off (in steps)
@@ -141,7 +144,7 @@ final class SequencerEngine {
             do {
                 try MIDIConnectionManager.shared.sendNoteOff(note: noteInfo.note)
             } catch {
-                print("SequencerEngine: Failed to send note off: \(error)")
+                logger.debug("Failed to send note off: \(error.localizedDescription)")
             }
         }
 

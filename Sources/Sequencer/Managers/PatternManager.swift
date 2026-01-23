@@ -1,6 +1,9 @@
 import Foundation
 import SwiftUI
 import CloudStorage
+import os.log
+
+private let logger = Logger(subsystem: "com.eurorack.midi", category: "PatternManager")
 
 /// Manages pattern storage and persistence
 class PatternManager: ObservableObject {
@@ -27,7 +30,10 @@ class PatternManager: ObservableObject {
     private let banksFileName = "banks.json"
 
     private var patternsDirectory: URL {
-        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        guard let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            // Fallback to temp directory if documents unavailable (should never happen)
+            return FileManager.default.temporaryDirectory.appendingPathComponent(patternsDirectoryName)
+        }
         return documentsPath.appendingPathComponent(patternsDirectoryName)
     }
 
@@ -39,10 +45,14 @@ class PatternManager: ObservableObject {
     }
 
     private func createPatternsDirectoryIfNeeded() {
-        try? FileManager.default.createDirectory(
-            at: patternsDirectory,
-            withIntermediateDirectories: true
-        )
+        do {
+            try FileManager.default.createDirectory(
+                at: patternsDirectory,
+                withIntermediateDirectories: true
+            )
+        } catch {
+            logger.error("Failed to create patterns directory: \(error.localizedDescription)")
+        }
     }
 
     // MARK: - Bank Access
@@ -120,14 +130,18 @@ class PatternManager: ObservableObject {
     // MARK: - Persistence
 
     private func persistBanks() {
-        guard let data = try? JSONEncoder().encode(banks) else { return }
+        do {
+            let data = try JSONEncoder().encode(banks)
 
-        // Save to CloudStorage
-        storedBanksData = data
+            // Save to CloudStorage
+            storedBanksData = data
 
-        // Also save to local file as backup
-        let fileURL = patternsDirectory.appendingPathComponent(banksFileName)
-        try? data.write(to: fileURL)
+            // Also save to local file as backup
+            let fileURL = patternsDirectory.appendingPathComponent(banksFileName)
+            try data.write(to: fileURL)
+        } catch {
+            logger.error("Failed to persist pattern banks: \(error.localizedDescription)")
+        }
     }
 
     private func loadBanks() {

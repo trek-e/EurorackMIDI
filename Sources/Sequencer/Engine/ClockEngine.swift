@@ -1,6 +1,9 @@
 import Foundation
 import Combine
 import MIDIKitCore
+import os.log
+
+private let logger = Logger(subsystem: "com.eurorack.midi", category: "ClockEngine")
 
 /// Clock behavior mode for transport/clock relationship
 enum ClockMode: String, CaseIterable {
@@ -348,7 +351,7 @@ final class ClockEngine: ObservableObject {
             let event = MIDIEvent.timingClock()
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            print("ClockEngine: Failed to send timing clock: \(error)")
+            logger.debug("Failed to send timing clock: \(error.localizedDescription)")
         }
     }
 
@@ -357,7 +360,7 @@ final class ClockEngine: ObservableObject {
             let event = MIDIEvent.start()
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            print("ClockEngine: Failed to send start: \(error)")
+            logger.debug("Failed to send start: \(error.localizedDescription)")
         }
     }
 
@@ -366,7 +369,7 @@ final class ClockEngine: ObservableObject {
             let event = MIDIEvent.stop()
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            print("ClockEngine: Failed to send stop: \(error)")
+            logger.debug("Failed to send stop: \(error.localizedDescription)")
         }
     }
 
@@ -375,7 +378,7 @@ final class ClockEngine: ObservableObject {
             let event = MIDIEvent.continue()
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            print("ClockEngine: Failed to send continue: \(error)")
+            logger.debug("Failed to send continue: \(error.localizedDescription)")
         }
     }
 
@@ -388,7 +391,7 @@ final class ClockEngine: ObservableObject {
             let event = MIDIEvent.songPositionPointer(midiBeat: UInt14(beat))
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            print("ClockEngine: Failed to send song position pointer: \(error)")
+            logger.debug("Failed to send song position pointer: \(error.localizedDescription)")
         }
     }
 }
