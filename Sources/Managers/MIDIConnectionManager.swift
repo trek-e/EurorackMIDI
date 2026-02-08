@@ -135,7 +135,11 @@ final class MIDIConnectionManager {
     // MARK: - MIDI Send Methods
 
     /// Send MIDI Note On message
-    func sendNoteOn(note: UInt7, velocity: UInt7) throws {
+    /// - Parameters:
+    ///   - note: MIDI note number (0-127)
+    ///   - velocity: MIDI velocity (1-127)
+    ///   - channel: MIDI channel (0-indexed UInt4). Defaults to selectedChannel.
+    func sendNoteOn(note: UInt7, velocity: UInt7, channel: MIDIChannel? = nil) throws {
         guard selectedDevice != nil else {
             throw MIDIConnectionError.noDeviceSelected
         }
@@ -148,7 +152,7 @@ final class MIDIConnectionManager {
             let event = MIDIEvent.noteOn(
                 note,
                 velocity: .midi1(velocity),
-                channel: selectedChannel
+                channel: channel ?? selectedChannel
             )
             try connection.send(event: event)
         } catch {
@@ -157,7 +161,10 @@ final class MIDIConnectionManager {
     }
 
     /// Send MIDI Note Off message
-    func sendNoteOff(note: UInt7) throws {
+    /// - Parameters:
+    ///   - note: MIDI note number (0-127)
+    ///   - channel: MIDI channel (0-indexed UInt4). Defaults to selectedChannel.
+    func sendNoteOff(note: UInt7, channel: MIDIChannel? = nil) throws {
         guard selectedDevice != nil else {
             throw MIDIConnectionError.noDeviceSelected
         }
@@ -170,7 +177,7 @@ final class MIDIConnectionManager {
             let event = MIDIEvent.noteOff(
                 note,
                 velocity: .midi1(0),
-                channel: selectedChannel
+                channel: channel ?? selectedChannel
             )
             try connection.send(event: event)
         } catch {

@@ -122,11 +122,11 @@ final class SequencerEngine {
         // Apply track volume to velocity
         let adjustedVelocity = UInt7(Double(note.velocity) * track.volume)
 
-        // Send note on
+        // Send note on with the track's specific MIDI channel
         do {
-            try MIDIConnectionManager.shared.sendNoteOn(note: midiNote, velocity: adjustedVelocity)
+            try MIDIConnectionManager.shared.sendNoteOn(note: midiNote, velocity: adjustedVelocity, channel: midiChannel)
         } catch {
-            logger.debug("Failed to send note on: \(error.localizedDescription)")
+            logger.error("Failed to send note on: \(error.localizedDescription)")
         }
 
         // Calculate when to send note-off (in steps)
@@ -140,16 +140,26 @@ final class SequencerEngine {
         // Find notes that need to be turned off
         let notesToOff = activeNotes.filter { $0.offStep == currentStep }
 
+        var failedNoteOffs: [(note: UInt7, channel: UInt4, offStep: Int)] = []
+
         for noteInfo in notesToOff {
             do {
-                try MIDIConnectionManager.shared.sendNoteOff(note: noteInfo.note)
+                try MIDIConnectionManager.shared.sendNoteOff(note: noteInfo.note, channel: noteInfo.channel)
             } catch {
-                logger.debug("Failed to send note off: \(error.localizedDescription)")
+                logger.error("Failed to send note off: \(error.localizedDescription)")
+                // Keep failed notes for retry on next step
+                failedNoteOffs.append(noteInfo)
             }
         }
 
-        // Remove processed notes
+        // Remove only successfully sent note-offs
         activeNotes.removeAll { $0.offStep == currentStep }
+
+        // Re-add failed notes scheduled for next step (retry)
+        for var note in failedNoteOffs {
+            note.offStep = (currentStep + 1) % (activePattern?.stepCount ?? 16)
+            activeNotes.append(note)
+        }
     }
 
     // MARK: - Transport Control
@@ -180,7 +190,11 @@ final class SequencerEngine {
 
     private func allNotesOff() {
         for noteInfo in activeNotes {
-            try? MIDIConnectionManager.shared.sendNoteOff(note: noteInfo.note)
+            do {
+                try MIDIConnectionManager.shared.sendNoteOff(note: noteInfo.note, channel: noteInfo.channel)
+            } catch {
+                logger.error("Failed to send all-notes-off for note \(noteInfo.note): \(error.localizedDescription)")
+            }
         }
         activeNotes.removeAll()
     }

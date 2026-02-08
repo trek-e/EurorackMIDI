@@ -100,7 +100,7 @@ final class DeviceProfileTests: XCTestCase {
         XCTAssertEqual(PresetTag.keys.displayName, "Keys")
         XCTAssertEqual(PresetTag.performance.displayName, "Performance")
 
-        XCTAssertEqual(PresetTag.allCases.count, 3)
+        XCTAssertEqual(PresetTag.allCases.count, 4)
     }
 
     func testPadMappingModeValues() {

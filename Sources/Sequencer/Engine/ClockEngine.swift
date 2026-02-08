@@ -82,7 +82,8 @@ final class ClockEngine: ObservableObject {
     static let ppqnOptions = [4, 24, 48, 96]
 
     /// Callback invoked on each clock tick (for sequencer synchronization)
-    var onTick: (() -> Void)?
+    /// Called on the clock queue — callers must dispatch to main if needed.
+    var onTick: (@Sendable () -> Void)?
 
     /// Clock interval in milliseconds (for debugging)
     var clockIntervalMs: Double {
@@ -155,7 +156,7 @@ final class ClockEngine: ObservableObject {
     // MARK: - Transport Control
 
     /// Start clock from the beginning
-    func start() {
+    @MainActor func start() {
         guard transportState == .stopped else { return }
 
         timerLock.lock()
@@ -178,7 +179,7 @@ final class ClockEngine: ObservableObject {
     }
 
     /// Stop clock
-    func stop() {
+    @MainActor func stop() {
         guard transportState != .stopped else { return }
 
         // Stop clock based on mode
@@ -194,7 +195,7 @@ final class ClockEngine: ObservableObject {
     }
 
     /// Continue from current position
-    func continue_() {
+    @MainActor func continue_() {
         guard transportState == .stopped else { return }
 
         timerLock.lock()
@@ -215,7 +216,7 @@ final class ClockEngine: ObservableObject {
     }
 
     /// Toggle between playing and stopped
-    func togglePlayback() {
+    @MainActor func togglePlayback() {
         if transportState == .stopped {
             start()
         } else {
@@ -226,7 +227,7 @@ final class ClockEngine: ObservableObject {
     // MARK: - Clock Control (for manual/always modes)
 
     /// Start clock only (without affecting transport state)
-    func startClock() {
+    @MainActor func startClock() {
         guard !isClockRunning else { return }
 
         timerLock.lock()
@@ -239,7 +240,7 @@ final class ClockEngine: ObservableObject {
     }
 
     /// Stop clock only (without affecting transport state)
-    func stopClock() {
+    @MainActor func stopClock() {
         guard isClockRunning else { return }
 
         stopTimer()
@@ -247,7 +248,7 @@ final class ClockEngine: ObservableObject {
     }
 
     /// Toggle clock on/off (for manual mode button)
-    func toggleClock() {
+    @MainActor func toggleClock() {
         if isClockRunning {
             stopClock()
         } else {
@@ -351,7 +352,7 @@ final class ClockEngine: ObservableObject {
             let event = MIDIEvent.timingClock()
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            logger.debug("Failed to send timing clock: \(error.localizedDescription)")
+            logger.error("Failed to send timing clock: \(error.localizedDescription)")
         }
     }
 
@@ -360,7 +361,7 @@ final class ClockEngine: ObservableObject {
             let event = MIDIEvent.start()
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            logger.debug("Failed to send start: \(error.localizedDescription)")
+            logger.error("Failed to send start: \(error.localizedDescription)")
         }
     }
 
@@ -369,7 +370,7 @@ final class ClockEngine: ObservableObject {
             let event = MIDIEvent.stop()
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            logger.debug("Failed to send stop: \(error.localizedDescription)")
+            logger.error("Failed to send stop: \(error.localizedDescription)")
         }
     }
 
@@ -378,7 +379,7 @@ final class ClockEngine: ObservableObject {
             let event = MIDIEvent.continue()
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            logger.debug("Failed to send continue: \(error.localizedDescription)")
+            logger.error("Failed to send continue: \(error.localizedDescription)")
         }
     }
 
@@ -391,7 +392,7 @@ final class ClockEngine: ObservableObject {
             let event = MIDIEvent.songPositionPointer(midiBeat: UInt14(beat))
             try MIDIConnectionManager.shared.sendSystemRealTime(event: event)
         } catch {
-            logger.debug("Failed to send song position pointer: \(error.localizedDescription)")
+            logger.error("Failed to send song position pointer: \(error.localizedDescription)")
         }
     }
 }

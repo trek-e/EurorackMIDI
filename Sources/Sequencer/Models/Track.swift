@@ -26,11 +26,11 @@ struct Track: Codable, Identifiable, Equatable {
         name: String = "Track"
     ) {
         self.id = id
-        self.channel = channel
+        self.channel = max(1, min(16, channel))
         self.notes = notes
         self.isMuted = isMuted
         self.isSoloed = isSoloed
-        self.volume = volume
+        self.volume = max(0.0, min(1.0, volume))
         self.name = name
     }
 }

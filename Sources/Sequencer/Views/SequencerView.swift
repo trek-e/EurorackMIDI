@@ -59,7 +59,7 @@ struct SequencerView: View {
             // Auto-save changes to the correct location
             if let location = editingPatternLocation {
                 // Pattern was loaded from browser - save back to same location
-                patternManager.savePattern(newPattern, bank: location.bank, slot: location.slot)
+                try? patternManager.savePattern(newPattern, bank: location.bank, slot: location.slot)
             }
             // If editingPatternLocation is nil, this is a new pattern - don't auto-save
         }
@@ -221,25 +221,29 @@ struct SequencerView: View {
     // MARK: - Helpers
 
     private func saveCurrentPattern() {
-        if let location = editingPatternLocation {
-            // Already has a location - save there
-            patternManager.savePattern(pattern, bank: location.bank, slot: location.slot)
-            ToastManager.shared.show(
-                message: "Saved to \(patternManager.slotIdentifier(bank: location.bank, slot: location.slot))",
-                type: .success
-            )
-        } else {
-            // New pattern - find first available slot
-            if let location = patternManager.savePatternToFirstAvailable(pattern) {
-                editingPatternLocation = location  // Now it has a location
-                patternManager.currentPattern = pattern
+        do {
+            if let location = editingPatternLocation {
+                // Already has a location - save there
+                try patternManager.savePattern(pattern, bank: location.bank, slot: location.slot)
                 ToastManager.shared.show(
                     message: "Saved to \(patternManager.slotIdentifier(bank: location.bank, slot: location.slot))",
                     type: .success
                 )
             } else {
-                ToastManager.shared.show(message: "All slots full", type: .warning)
+                // New pattern - find first available slot
+                if let location = try patternManager.savePatternToFirstAvailable(pattern) {
+                    editingPatternLocation = location  // Now it has a location
+                    patternManager.currentPattern = pattern
+                    ToastManager.shared.show(
+                        message: "Saved to \(patternManager.slotIdentifier(bank: location.bank, slot: location.slot))",
+                        type: .success
+                    )
+                } else {
+                    ToastManager.shared.show(message: "All slots full", type: .warning)
+                }
             }
+        } catch {
+            ToastManager.shared.show(message: "Failed to save pattern", type: .error)
         }
     }
 }

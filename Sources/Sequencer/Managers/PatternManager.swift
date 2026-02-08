@@ -59,7 +59,7 @@ class PatternManager: ObservableObject {
 
     /// Get currently selected bank
     var selectedBank: PatternBank {
-        banks[selectedBankIndex]
+        banks[min(selectedBankIndex, banks.count - 1)]
     }
 
     /// Get bank by index
@@ -71,7 +71,7 @@ class PatternManager: ObservableObject {
     // MARK: - Pattern Operations
 
     /// Save pattern to specific bank and slot
-    func savePattern(_ pattern: Pattern, bank bankIndex: Int, slot: Int) {
+    func savePattern(_ pattern: Pattern, bank bankIndex: Int, slot: Int) throws {
         guard bankIndex >= 0 && bankIndex < banks.count else { return }
         guard slot >= 0 && slot < PatternBank.patternsPerBank else { return }
 
@@ -79,21 +79,21 @@ class PatternManager: ObservableObject {
         updatedPattern.touch()
 
         banks[bankIndex].setPattern(updatedPattern, at: slot)
-        persistBanks()
+        try persistBanks()
     }
 
     /// Save pattern to first available slot in current bank
-    func savePatternToFirstAvailable(_ pattern: Pattern) -> (bank: Int, slot: Int)? {
+    func savePatternToFirstAvailable(_ pattern: Pattern) throws -> (bank: Int, slot: Int)? {
         // Try current bank first
         if let slot = banks[selectedBankIndex].firstEmptySlot {
-            savePattern(pattern, bank: selectedBankIndex, slot: slot)
+            try savePattern(pattern, bank: selectedBankIndex, slot: slot)
             return (selectedBankIndex, slot)
         }
 
         // Try other banks
         for (bankIndex, bank) in banks.enumerated() {
             if let slot = bank.firstEmptySlot {
-                savePattern(pattern, bank: bankIndex, slot: slot)
+                try savePattern(pattern, bank: bankIndex, slot: slot)
                 return (bankIndex, slot)
             }
         }
@@ -107,41 +107,38 @@ class PatternManager: ObservableObject {
     }
 
     /// Delete pattern from bank and slot
-    func deletePattern(bank bankIndex: Int, slot: Int) {
+    func deletePattern(bank bankIndex: Int, slot: Int) throws {
         guard bankIndex >= 0 && bankIndex < banks.count else { return }
         banks[bankIndex].setPattern(nil, at: slot)
-        persistBanks()
+        try persistBanks()
     }
 
     /// Move pattern between slots
-    func movePattern(from: (bank: Int, slot: Int), to: (bank: Int, slot: Int)) {
+    func movePattern(from: (bank: Int, slot: Int), to: (bank: Int, slot: Int)) throws {
         guard let pattern = loadPattern(bank: from.bank, slot: from.slot) else { return }
-        deletePattern(bank: from.bank, slot: from.slot)
-        savePattern(pattern, bank: to.bank, slot: to.slot)
+        try deletePattern(bank: from.bank, slot: from.slot)
+        try savePattern(pattern, bank: to.bank, slot: to.slot)
     }
 
     /// Duplicate pattern to first available slot
-    func duplicatePattern(bank bankIndex: Int, slot: Int) -> (bank: Int, slot: Int)? {
+    func duplicatePattern(bank bankIndex: Int, slot: Int) throws -> (bank: Int, slot: Int)? {
         guard let original = loadPattern(bank: bankIndex, slot: slot) else { return nil }
         let copy = original.duplicate()
-        return savePatternToFirstAvailable(copy)
+        return try savePatternToFirstAvailable(copy)
     }
 
     // MARK: - Persistence
 
-    private func persistBanks() {
-        do {
-            let data = try JSONEncoder().encode(banks)
+    /// Persist banks to cloud and local storage. Throws on failure.
+    private func persistBanks() throws {
+        let data = try JSONEncoder().encode(banks)
 
-            // Save to CloudStorage
-            storedBanksData = data
+        // Save to CloudStorage
+        storedBanksData = data
 
-            // Also save to local file as backup
-            let fileURL = patternsDirectory.appendingPathComponent(banksFileName)
-            try data.write(to: fileURL)
-        } catch {
-            logger.error("Failed to persist pattern banks: \(error.localizedDescription)")
-        }
+        // Also save to local file as backup
+        let fileURL = patternsDirectory.appendingPathComponent(banksFileName)
+        try data.write(to: fileURL)
     }
 
     private func loadBanks() {
@@ -238,12 +235,12 @@ extension PatternManager {
     }
 
     /// Import banks from JSON data (replaces all)
-    func importBanks(from data: Data) -> Bool {
+    func importBanks(from data: Data) throws -> Bool {
         guard let loadedBanks = try? JSONDecoder().decode([PatternBank].self, from: data) else {
             return false
         }
         banks = loadedBanks
-        persistBanks()
+        try persistBanks()
         return true
     }
 }

@@ -42,7 +42,7 @@ enum VelocityCurve: String, Codable, CaseIterable {
     /// - Returns: MIDI velocity (1-127)
     func toMIDIVelocity(from normalizedInput: Double, fixedValue: Int? = nil) -> UInt7 {
         if self == .fixed, let fixed = fixedValue {
-            return UInt7(clamping: fixed)
+            return UInt7(clamping: max(1, min(127, fixed)))
         }
 
         let transformed = apply(to: normalizedInput)

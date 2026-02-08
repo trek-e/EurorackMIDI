@@ -59,12 +59,12 @@ struct Pattern: Codable, Identifiable, Equatable {
         self.id = id
         self.name = name
         self.colorHex = colorHex
-        self.stepCount = stepCount
+        self.stepCount = max(1, min(64, stepCount))
         self.tracks = tracks
-        self.swing = swing
+        self.swing = max(0.0, min(1.0, swing))
         self.triggerMode = triggerMode
         self.launchQuantize = launchQuantize
-        self.beatsPerBar = beatsPerBar
+        self.beatsPerBar = max(1, beatsPerBar)
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
     }
@@ -98,12 +98,13 @@ struct Pattern: Codable, Identifiable, Equatable {
         id = try container.decode(UUID.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
         colorHex = try container.decodeIfPresent(String.self, forKey: .colorHex) ?? "4A90D9"
-        stepCount = try container.decode(Int.self, forKey: .stepCount)
+        let decodedStepCount = try container.decode(Int.self, forKey: .stepCount)
+        stepCount = max(1, min(64, decodedStepCount))
         tracks = try container.decode([Track].self, forKey: .tracks)
-        swing = try container.decodeIfPresent(Double.self, forKey: .swing) ?? 0.0
+        swing = max(0.0, min(1.0, try container.decodeIfPresent(Double.self, forKey: .swing) ?? 0.0))
         triggerMode = try container.decodeIfPresent(TriggerMode.self, forKey: .triggerMode) ?? .toggle
         launchQuantize = try container.decodeIfPresent(LaunchQuantize.self, forKey: .launchQuantize) ?? .bar
-        beatsPerBar = try container.decodeIfPresent(Int.self, forKey: .beatsPerBar) ?? 4
+        beatsPerBar = max(1, try container.decodeIfPresent(Int.self, forKey: .beatsPerBar) ?? 4)
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
         modifiedAt = try container.decodeIfPresent(Date.self, forKey: .modifiedAt) ?? Date()
 
@@ -189,8 +190,20 @@ extension Color {
     }
 
     func toHex() -> String {
-        // SwiftUI Color doesn't expose RGB components directly in a cross-platform way
-        // This is a placeholder - full implementation would use UIColor/NSColor
-        "4A90D9"
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+
+        #if canImport(UIKit)
+        UIColor(self).getRed(&red, green: &green, blue: &blue, alpha: nil)
+        #elseif canImport(AppKit)
+        let nsColor = NSColor(self).usingColorSpace(.sRGB) ?? NSColor(self)
+        nsColor.getRed(&red, green: &green, blue: &blue, alpha: nil)
+        #endif
+
+        let r = Int(round(red * 255))
+        let g = Int(round(green * 255))
+        let b = Int(round(blue * 255))
+        return String(format: "%02X%02X%02X", r, g, b)
     }
 }
